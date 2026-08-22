@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLibraryStore } from '../stores/library';
+import { isTauri } from '../api/backend';
 import SettingsModal from './SettingsModal';
 
 type ViewName = 'library' | 'songs' | 'albums' | 'artists' | 'playlists';
@@ -15,38 +16,50 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const { scanFolder, importFiles } = useLibraryStore();
 
   const handleFolderSelect = async () => {
+    if (!isTauri) {
+      // Browser mode: ask for a server-side path (default = ~/Music)
+      const input = window.prompt(
+        'Enter the music folder on this machine to scan (server-side path):',
+        '/root/Music',
+      );
+      if (input) {
+        await scanFolder(input.trim());
+      }
+      return;
+    }
     try {
-      console.log('[Sidebar] Attempting to open folder dialog...');
       const { open } = await import('@tauri-apps/plugin-dialog');
-      console.log('[Sidebar] Dialog plugin imported successfully');
-      
       const selected = await open({
         directory: true,
         multiple: false,
         title: 'Select Music Folder',
       });
-      
-      console.log('[Sidebar] Folder dialog result:', selected);
-      
       if (selected && typeof selected === 'string') {
-        console.log('[Sidebar] Scanning folder:', selected);
         await scanFolder(selected);
-        console.log('[Sidebar] Folder scan completed');
-      } else {
-        console.log('[Sidebar] No folder selected or selection cancelled');
       }
     } catch (error) {
       console.error('[Sidebar] Failed to select folder:', error);
-      alert(`Failed to open folder dialog: ${error}. Please try again.`);
     }
   };
 
   const handleFileImport = async () => {
+    if (!isTauri) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = 'audio/*,.mp3,.flac,.wav,.ogg,.m4a,.aac,.wma,.aiff,.opus';
+      input.onchange = async () => {
+        const files = Array.from(input.files ?? []);
+        if (files.length > 0) {
+          // Browsers expose only synthetic paths for picked files; pass what we have.
+          await importFiles(files.map((f) => (f as File & { path?: string }).path ?? f.name));
+        }
+      };
+      input.click();
+      return;
+    }
     try {
-      console.log('[Sidebar] Attempting to open file dialog...');
       const { open } = await import('@tauri-apps/plugin-dialog');
-      console.log('[Sidebar] Dialog plugin imported successfully');
-      
       const selected = await open({
         multiple: true,
         filters: [{
@@ -55,19 +68,11 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
         }],
         title: 'Import Music Files',
       });
-      
-      console.log('[Sidebar] File dialog result:', selected);
-      
       if (selected && Array.isArray(selected) && selected.length > 0) {
-        console.log('[Sidebar] Importing files:', selected);
         await importFiles(selected);
-        console.log('[Sidebar] File import completed');
-      } else {
-        console.log('[Sidebar] No files selected or selection cancelled');
       }
     } catch (error) {
       console.error('[Sidebar] Failed to import files:', error);
-      alert(`Failed to open file dialog: ${error}. Please try again.`);
     }
   };
 

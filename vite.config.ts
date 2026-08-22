@@ -9,5 +9,11 @@ export default defineConfig({
       'work-1-enfulgckevggvnjv.prod-runtime.all-hands.dev',
       'work-2-enfulgckevggvnjv.prod-runtime.all-hands.dev',
     ],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:12001',
+        changeOrigin: true,
+      },
+    },
   },
 })

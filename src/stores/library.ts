@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { invokeBackend } from '../api/backend';
 
 const toMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -19,6 +20,29 @@ export interface LibraryStats {
   total_artists: number;
 }
 
+interface RawTrack {
+  track_id: string;
+  id?: string;
+  title: string;
+  artist: string | null;
+  album: string | null;
+  duration: number | null;
+  duration_ms: number | null;
+  local_file_path: string | null;
+  file_path?: string | null;
+  format?: string;
+}
+
+const normalizeTrack = (raw: RawTrack): Track => ({
+  id: raw.track_id ?? raw.id ?? '',
+  title: raw.title,
+  artist: raw.artist ?? 'Unknown Artist',
+  album: raw.album ?? '',
+  duration: raw.duration ?? (raw.duration_ms ? raw.duration_ms / 1000 : 0),
+  file_path: raw.local_file_path ?? raw.file_path ?? '',
+  format: raw.format ?? '',
+});
+
 interface LibraryStore {
   tracks: Track[];
   stats: LibraryStats | null;
@@ -38,8 +62,8 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
   fetchLibrary: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const tracks = await invoke<Track[]>('get_library');
+      const rawTracks = await invokeBackend('get_library') as unknown as RawTrack[];
+      const tracks = rawTracks.map(normalizeTrack);
       set({ tracks, isLoading: false });
     } catch (error) {
       set({ error: toMessage(error), isLoading: false });
@@ -49,10 +73,10 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
   scanFolder: async (folderPath: string) => {
     set({ isLoading: true, error: null });
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('scan_folder', { folderPath });
+      await invokeBackend('scan_folder', { folderPath });
       // Refresh library after scan
-      const tracks = await invoke<Track[]>('get_library');
+      const rawTracks = await invokeBackend('get_library') as unknown as RawTrack[];
+      const tracks = rawTracks.map(normalizeTrack);
       set({ tracks, isLoading: false });
     } catch (error) {
       set({ error: toMessage(error), isLoading: false });
@@ -62,10 +86,10 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
   importFiles: async (filePaths: string[]) => {
     set({ isLoading: true, error: null });
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('import_files', { filePaths });
+      await invokeBackend('import_files', { filePaths });
       // Refresh library after import
-      const tracks = await invoke<Track[]>('get_library');
+      const rawTracks = await invokeBackend('get_library') as unknown as RawTrack[];
+      const tracks = rawTracks.map(normalizeTrack);
       set({ tracks, isLoading: false });
     } catch (error) {
       set({ error: toMessage(error), isLoading: false });
