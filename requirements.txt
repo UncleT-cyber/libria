@@ -1,0 +1,6 @@
+customtkinter>=5.2.0
+mutagen>=1.47
+python-vlc>=3.0.20
+# alternate audio backend: pygame>=2.5
+# optional high-quality archiver used by the default download worker:
+yt-dlp>=2024.1.1
