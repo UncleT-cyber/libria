@@ -13,10 +13,12 @@ def manager(tmp_path):
 
 def test_defaults_materialized_in_ledger(manager):
     stored = manager._db.all_settings()
-    for key in ("download_directory", "audio_quality", "dark_mode"):
+    for key in ("SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "download_directory",
+                "audio_quality", "explicit_content_allowed", "auto_play_enabled",
+                "dark_mode"):
         assert key in stored
-    assert manager.get("audio_quality") == "high"
-    assert manager.get_bool("dark_mode") is False
+    assert manager.get("audio_quality") == "320kbps"
+    assert manager.get_bool("dark_mode") is True
 
 
 def test_set_writes_ledger_then_broadcasts(manager):

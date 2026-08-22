@@ -51,6 +51,7 @@ interface LibraryStore {
   fetchLibrary: () => Promise<void>;
   scanFolder: (folderPath: string) => Promise<void>;
   importFiles: (filePaths: string[]) => Promise<void>;
+  importSpotify: (url: string) => Promise<void>;
 }
 
 export const useLibraryStore = create<LibraryStore>((set) => ({
@@ -88,6 +89,18 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
     try {
       await invokeBackend('import_files', { filePaths });
       // Refresh library after import
+      const rawTracks = await invokeBackend('get_library') as unknown as RawTrack[];
+      const tracks = rawTracks.map(normalizeTrack);
+      set({ tracks, isLoading: false });
+    } catch (error) {
+      set({ error: toMessage(error), isLoading: false });
+    }
+  },
+
+  importSpotify: async (url: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await invokeBackend('import_spotify', { url });
       const rawTracks = await invokeBackend('get_library') as unknown as RawTrack[];
       const tracks = rawTracks.map(normalizeTrack);
       set({ tracks, isLoading: false });

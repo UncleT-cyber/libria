@@ -13,7 +13,16 @@ interface SidebarProps {
 export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { scanFolder, importFiles } = useLibraryStore();
+  const { scanFolder, importFiles, importSpotify } = useLibraryStore();
+
+  const handleSpotifyImport = async () => {
+    const url = window.prompt(
+      'Paste a Spotify track URL (e.g. https://open.spotify.com/track/...):',
+    );
+    if (url && url.trim()) {
+      await importSpotify(url.trim());
+    }
+  };
 
   const handleFolderSelect = async () => {
     if (!isTauri) {
@@ -158,6 +167,14 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
                 <DownloadIcon className="w-5 h-5 flex-shrink-0" />
                 {!isCollapsed && <span className="font-medium">Import Files</span>}
               </button>
+              <button
+                onClick={handleSpotifyImport}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-libria-secondary hover:bg-libria-elevated hover:text-libria-text transition-colors"
+                title={isCollapsed ? 'Spotify URL' : undefined}
+              >
+                <LinkIcon className="w-5 h-5 flex-shrink-0" />
+                {!isCollapsed && <span className="font-medium">Spotify URL</span>}
+              </button>
             </div>
           </div>
         </nav>
@@ -258,6 +275,14 @@ function ChevronRightIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5m5.156-2.5a4 4 0 015.656 5.656l-3 3a4 4 0 01-5.656 0" />
     </svg>
   );
 }

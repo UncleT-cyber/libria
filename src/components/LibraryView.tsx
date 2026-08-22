@@ -96,10 +96,19 @@ export default function LibraryView() {
                 className="flex items-center group hover:bg-white/5 rounded-lg cursor-pointer transition-colors px-4"
                 onClick={() => playTrack(track.id)}
               >
-                <div className="w-12 h-12 bg-libria-elevated rounded-md flex items-center justify-center mr-4 flex-shrink-0">
-                  <svg className="w-6 h-6 text-libria-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                  </svg>
+                <div
+                  className="w-12 h-12 bg-libria-elevated rounded-md flex items-center justify-center mr-4 flex-shrink-0"
+                  title={track.file_path ? 'Archived locally' : 'Streaming (no local archive yet)'}
+                >
+                  {track.file_path ? (
+                    <svg className="w-6 h-6 text-libria-violet" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3M12 4v12m0 0l-4-4m4 4l4-4" />
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6 text-libria-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999A5.5 5.5 0 107.5 10.5 4 4 0 003 15z" />
+                    </svg>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-libria-text truncate group-hover:text-white transition-colors">{track.title}</div>

@@ -3,11 +3,14 @@ import urllib.request
 
 import pytest
 
+from libria import spotify
 from libria.server import create_server
 
 
 @pytest.fixture
-def server(tmp_path):
+def server(tmp_path, monkeypatch):
+    # Metadata lookup is opportunistic; never let tests depend on the network.
+    monkeypatch.setattr(spotify, "fetch_oembed", lambda url, timeout=5.0: {})
     srv = create_server(db_path=str(tmp_path / "api.db"), port=0)
     port = srv.server_address[1]
     import threading
@@ -85,3 +88,64 @@ def test_scan_folder_missing_path_500(server):
         post(base, "scan_folder", {"folderPath": "/definitely/not/here"})
     assert info.value.code == 500
     assert b"not a directory" in info.value.read()
+
+
+def test_import_spotify_creates_stream_only_row(server):
+    base, _ = server
+    status, result = post(
+        base, "import_spotify",
+        {"url": "https://open.spotify.com/track/0eGcygCz4qIPkGdEzHyiup?si=x"},
+    )
+    assert status == 200
+    track = result["track"]
+    assert track["track_id"] == "0eGcygCz4qIPkGdEzHyiup"
+    assert track["spotify_url"].startswith("https://open.spotify.com/track/")
+    assert track["local_file_path"] is None  # stream-only until the queue archives it
+    assert result["enqueued"] is False      # no download manager in this fixture
+
+
+def test_import_spotify_rejects_bad_url(server):
+    base, _ = server
+    with pytest.raises(urllib.error.HTTPError) as info:
+        post(base, "import_spotify", {"url": "https://example.com/x"})
+    assert info.value.code == 500
+    assert b"not a Spotify URL" in info.value.read()
+
+
+def test_audio_endpoint_streams_archived_file(server, tmp_path):
+    base, _ = server
+    media = tmp_path / "tune.wav"
+    media.write_bytes(b"RIFF" + b"\x00" * 100)
+    post(base, "import_files", {"filePaths": [str(media)]})
+    _, tracks = get(base, "get_library")
+    track_id = tracks[0]["track_id"]
+
+    url = f"{base}/api/audio/{urllib.parse.quote(track_id, safe='')}"
+    with urllib.request.urlopen(url, timeout=5) as resp:
+        assert resp.status == 200
+        assert resp.headers.get("Accept-Ranges") == "bytes"
+        assert resp.read(8) == b"RIFF\x00\x00\x00\x00"
+
+    req = urllib.request.Request(url, headers={"Range": "bytes=4-9"})
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        assert resp.status == 206
+        assert resp.headers["Content-Range"].startswith("bytes 4-9/")
+        assert len(resp.read()) == 6
+
+
+def test_audio_endpoint_404_for_stream_only(server):
+    base, _ = server
+    post(base, "import_spotify", {"url": "https://open.spotify.com/track/abc123"})
+    with pytest.raises(urllib.error.HTTPError) as info:
+        urllib.request.urlopen(f"{base}/api/audio/abc123", timeout=5)
+    assert info.value.code == 404
+
+
+def test_settings_roundtrip(server):
+    base, _ = server
+    _, initial = get(base, "get_settings")
+    assert initial["audio_quality"] == "320kbps"
+
+    post(base, "set_setting", {"key": "audio_quality", "value": "128kbps"})
+    _, updated = get(base, "get_settings")
+    assert updated["audio_quality"] == "128kbps"

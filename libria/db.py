@@ -56,19 +56,36 @@ CREATE TABLE IF NOT EXISTS app_settings (
 );
 """
 
-_SPOTIFY_PREFIX = "spotify:track:"
+# Seed configuration matrix (master directive section 1.B).
+SEED_SETTINGS = {
+    "SPOTIFY_CLIENT_ID": "",
+    "SPOTIFY_CLIENT_SECRET": "",
+    "download_directory": "./downloads",
+    "audio_quality": "320kbps",
+    "explicit_content_allowed": "true",
+    "auto_play_enabled": "true",
+    "dark_mode": "true",
+}
+
+_SPOTIFY_PREFIXES = ("spotify:track:", "spotify:album:", "spotify:playlist:")
 
 
 def normalize_track_id(ref: str) -> str:
-    """Reduce a Spotify track reference (bare ID, ``spotify:track:`` URI, or
-    open.spotify.com URL) to the canonical bare ID used as primary key."""
+    """Reduce a Spotify reference (bare ID, ``spotify:<kind>:`` URI, or
+    open.spotify.com URL) to the canonical bare ID used as primary key.
+    Non-track kinds keep their ``album:``/``playlist:`` prefix so that a
+    collection placeholder remains stable across re-imports."""
     ref = ref.strip()
-    if ref.startswith(_SPOTIFY_PREFIX):
-        return ref[len(_SPOTIFY_PREFIX):]
-    if "open.spotify.com/track/" in ref:
-        slug = ref.split("open.spotify.com/track/", 1)[1]
-        slug = slug.split("?", 1)[0].split("/", 1)[0]
-        return slug
+    for prefix in _SPOTIFY_PREFIXES:
+        if ref.startswith(prefix):
+            body = ref[len(prefix):]
+            return body if prefix == "spotify:track:" else f"{prefix[len('spotify:'):-1]}:{body}"
+    for kind in ("track", "album", "playlist"):
+        marker = f"open.spotify.com/{kind}/"
+        if marker in ref:
+            slug = ref.split(marker, 1)[1]
+            slug = slug.split("?", 1)[0].split("/", 1)[0]
+            return slug if kind == "track" else f"{kind}:{slug}"
     return ref
 
 
@@ -88,6 +105,12 @@ class Database:
     def initialize_schema(self) -> None:
         with self._lock:
             self._conn.executescript(SCHEMA)
+            # Seed the runtime-critical configuration matrix exactly once.
+            for key, value in SEED_SETTINGS.items():
+                self._conn.execute(
+                    "INSERT OR IGNORE INTO app_settings (key, value) VALUES (?,?)",
+                    (key, value),
+                )
             self._conn.commit()
 
     # -- tracks ------------------------------------------------------

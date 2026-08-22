@@ -1,10 +1,13 @@
 import { usePlayerStore } from '../stores/player';
+import { useLibraryStore } from '../stores/library';
 import { useState, useEffect } from 'react';
 
 export default function PlayerBar() {
   const { state, playTrack, pausePlayback, seekPlayback, setVolume, tick } = usePlayerStore();
+  const { tracks } = useLibraryStore();
   const [isLiked, setIsLiked] = useState(false);
   const [volumePercent, setVolumePercent] = useState(100);
+  const activeTrack = tracks.find((t) => t.id === state.currentTrack);
 
   // Simulate playback progress
   useEffect(() => {
@@ -46,11 +49,11 @@ export default function PlayerBar() {
           </svg>
         </div>
         <div className="min-w-0">
-          <div className="font-medium text-[#fff] truncate text-sm">
-            {state.currentTrack ? 'Now Playing' : 'No track selected'}
+          <div className="font-medium text-[#fff] truncate text-sm hover:underline cursor-pointer">
+            {activeTrack ? activeTrack.title : state.currentTrack ? 'Now Playing' : 'No track selected'}
           </div>
           <div className="text-xs text-[#b3b3b3] truncate">
-            {state.currentTrack || 'Select a track to play'}
+            {activeTrack ? activeTrack.artist : state.currentTrack || 'Select a track to play'}
           </div>
         </div>
         <button 

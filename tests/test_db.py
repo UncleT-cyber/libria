@@ -87,4 +87,8 @@ def test_app_settings_atomic_upsert(db):
     db.set_setting("audio_quality", "high")
     assert db.get_setting("audio_quality") == "high"
     assert db.get_setting("missing") is None
-    assert db.all_settings() == {"audio_quality": "high"}
+    settings = db.all_settings()
+    assert settings["audio_quality"] == "high"
+    # directive seed matrix is present from the start
+    assert settings["SPOTIFY_CLIENT_ID"] == ""
+    assert settings["download_directory"] == "./downloads"
