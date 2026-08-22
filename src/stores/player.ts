@@ -11,11 +11,15 @@ export interface PlayerState {
 
 interface PlayerStore {
   state: PlayerState;
+  shuffle: boolean;
+  repeatMode: 'off' | 'all' | 'one';
   playTrack: (trackId: string) => Promise<void>;
   pausePlayback: () => Promise<void>;
   stopPlayback: () => Promise<void>;
   seekPlayback: (position: number) => Promise<void>;
   setVolume: (volume: number) => void;
+  toggleShuffle: () => void;
+  cycleRepeat: () => void;
   fetchPlayerState: () => Promise<void>;
   tick: () => void;
 }
@@ -75,6 +79,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
       duration: 0,
       volume: 1.0,
     },
+    shuffle: false,
+    repeatMode: 'off',
+
+    toggleShuffle: () => set((s) => ({ shuffle: !s.shuffle })),
+    cycleRepeat: () =>
+      set((s) => ({
+        repeatMode: s.repeatMode === 'off' ? 'all' : s.repeatMode === 'all' ? 'one' : 'off',
+      })),
 
     playTrack: async (trackId: string) => {
       if (!isTauri) {

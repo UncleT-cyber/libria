@@ -1,151 +1,170 @@
 import { usePlayerStore } from '../stores/player';
 import { useLibraryStore } from '../stores/library';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import {
+  PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
+  HeartIcon, HeartFilledIcon, MusicNoteIcon, MicIcon, QueueIcon,
+  VolumeIcon, VolumeMuteIcon, FullscreenIcon, NowPlayingIcon,
+} from './icons';
 
-export default function PlayerBar() {
-  const { state, playTrack, pausePlayback, seekPlayback, setVolume, tick } = usePlayerStore();
+const fmt = (seconds: number) => {
+  if (!seconds || !Number.isFinite(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+interface PlayerBarProps {
+  nowPlayingOpen: boolean;
+  onToggleNowPlaying: () => void;
+}
+
+export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying }: PlayerBarProps) {
+  const {
+    state, playTrack, pausePlayback, seekPlayback, setVolume,
+    shuffle, repeatMode, toggleShuffle, cycleRepeat,
+  } = usePlayerStore();
   const { tracks } = useLibraryStore();
-  const [isLiked, setIsLiked] = useState(false);
-  const [volumePercent, setVolumePercent] = useState(100);
+  const [muted, setMuted] = useState(false);
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+
   const activeTrack = tracks.find((t) => t.id === state.currentTrack);
+  const currentIndex = tracks.findIndex((t) => t.id === state.currentTrack);
 
-  // Simulate playback progress
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
+  const playNeighbor = (dir: 1 | -1) => {
+    if (tracks.length === 0) return;
+    const order = shuffle ? tracks.slice().sort(() => Math.random() - 0.5) : tracks;
+    const idx = shuffle ? order.findIndex((t) => t.id === state.currentTrack) : currentIndex;
+    const nextIdx = idx === -1 ? 0 : (idx + dir + order.length) % order.length;
+    playTrack(order[nextIdx].id);
+  };
+
+  const togglePlay = () => {
     if (state.isPlaying) {
-      interval = setInterval(() => {
-        tick();
-      }, 1000);
+      pausePlayback();
+    } else if (state.currentTrack) {
+      playTrack(state.currentTrack);
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [state.isPlaying, tick]);
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPosition = parseInt(e.target.value);
-    seekPlayback(newPosition);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolumePercent(Math.round(newVolume * 100));
-    setVolume(newVolume);
-  };
+  const isLiked = state.currentTrack ? liked[state.currentTrack] : false;
 
   return (
-    <div className="h-24 bg-[#181818] border-t border-[#282828] flex items-center px-4">
-      {/* Track Info */}
-      <div className="w-72 flex items-center">
-        <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center mr-3 flex-shrink-0">
-          <svg className="w-7 h-7 text-[#b3b3b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-          </svg>
+    <div className="h-[72px] flex-shrink-0 bg-black px-4 flex items-center justify-between gap-4">
+      {/* Left: track info */}
+      <div className="flex items-center gap-3 w-[30%] min-w-[180px] max-w-sm">
+        <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0">
+          <MusicNoteIcon className="w-6 h-6" />
         </div>
         <div className="min-w-0">
-          <div className="font-medium text-[#fff] truncate text-sm hover:underline cursor-pointer">
-            {activeTrack ? activeTrack.title : state.currentTrack ? 'Now Playing' : 'No track selected'}
-          </div>
-          <div className="text-xs text-[#b3b3b3] truncate">
-            {activeTrack ? activeTrack.artist : state.currentTrack || 'Select a track to play'}
-          </div>
+          <button className="block text-sm text-white hover:underline truncate font-medium text-left">
+            {activeTrack?.title ?? 'Libria'}
+          </button>
+          <button className="block text-[11px] text-[#b3b3b3] hover:text-white hover:underline truncate text-left">
+            {activeTrack?.artist ?? 'Select a track'}
+          </button>
         </div>
-        <button 
-          onClick={() => setIsLiked(!isLiked)}
-          className="ml-3 text-[#b3b3b3] hover:text-[#fff] transition-colors"
+        <button
+          onClick={() => state.currentTrack && setLiked((l) => ({ ...l, [state.currentTrack!]: !l[state.currentTrack!] }))}
+          className={`flex-shrink-0 transition-colors ${isLiked ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
         >
-          <svg 
-            className="w-5 h-5" 
-            fill={isLiked ? "#1DB954" : "none"} 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
+          {isLiked ? <HeartFilledIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* Player Controls */}
-      <div className="flex-1 flex flex-col items-center max-w-2xl">
-        <div className="flex items-center gap-6 mb-2">
-          <button className="text-[#b3b3b3] hover:text-[#fff] transition-colors">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
-            </svg>
-          </button>
-          
-          <button 
-            onClick={() => {
-              if (state.currentTrack) {
-                if (state.isPlaying) {
-                  pausePlayback();
-                } else {
-                  playTrack(state.currentTrack);
-                }
-              }
-            }}
-            className="w-9 h-9 bg-white rounded-full flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+      {/* Center: controls + progress */}
+      <div className="flex flex-col items-center gap-1.5 w-[40%] max-w-2xl">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleShuffle}
+            title="Shuffle"
+            className={`relative transition-colors ${shuffle ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
           >
-            {state.isPlaying ? (
-              <svg className="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-              </svg>
-            ) : (
-              <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
+            <ShuffleIcon className="w-4 h-4" />
+            {shuffle && <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />}
+          </button>
+          <button onClick={() => playNeighbor(-1)} title="Previous" className="text-[#b3b3b3] hover:text-white transition-colors">
+            <PrevIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={togglePlay}
+            className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform"
+            title={state.isPlaying ? 'Pause' : 'Play'}
+          >
+            {state.isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
+          </button>
+          <button onClick={() => playNeighbor(1)} title="Next" className="text-[#b3b3b3] hover:text-white transition-colors">
+            <NextIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={cycleRepeat}
+            title="Repeat"
+            className={`relative transition-colors ${repeatMode !== 'off' ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+          >
+            <RepeatIcon className="w-4 h-4" />
+            {repeatMode !== 'off' && (
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center">
+                <span className={`${repeatMode === 'one' ? 'text-[8px] font-bold' : 'w-1 h-1 rounded-full bg-[#1DB954]'}`}>
+                  {repeatMode === 'one' ? '1' : ''}
+                </span>
+              </span>
             )}
           </button>
-          
-          <button className="text-[#b3b3b3] hover:text-[#fff] transition-colors">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/>
-            </svg>
-          </button>
         </div>
-
-        {/* Progress Bar */}
-        <div className="w-full flex items-center gap-2">
-          <span className="text-xs text-[#b3b3b3] w-10 text-right">
-            {formatDuration(state.position)}
-          </span>
+        <div className="w-full flex items-center gap-2 text-xs text-[#b3b3b3]">
+          <span className="w-10 text-right">{fmt(state.position)}</span>
           <input
             type="range"
-            min="0"
-            max={state.duration || 100}
-            value={state.position}
-            onChange={handleSeek}
-            className="flex-1 h-1 bg-[#4d4d4d] rounded-full appearance-none cursor-pointer accent-white"
+            min={0}
+            max={Math.floor(state.duration) || 0}
+            value={Math.floor(Math.min(state.position, state.duration))}
+            onChange={(e) => seekPlayback(Number(e.target.value))}
+            className="spotify-range flex-1"
           />
-          <span className="text-xs text-[#b3b3b3] w-10">
-            {formatDuration(state.duration)}
-          </span>
+          <span className="w-10">{fmt(state.duration)}</span>
         </div>
       </div>
 
-      {/* Volume Control */}
-      <div className="w-72 flex items-center justify-end gap-2">
-        <button className="text-[#b3b3b3] hover:text-[#fff] transition-colors">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-          </svg>
+      {/* Right: utilities */}
+      <div className="flex items-center gap-3 w-[30%] justify-end min-w-[180px]">
+        <button
+          onClick={onToggleNowPlaying}
+          title="Now playing view"
+          className={`transition-colors ${nowPlayingOpen ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+        >
+          <NowPlayingIcon className="w-4 h-4" />
         </button>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={state.volume}
-          onChange={handleVolumeChange}
-          className="w-24 h-1 bg-[#4d4d4d] rounded-full appearance-none cursor-pointer accent-white"
-        />
-        <span className="text-xs text-[#b3b3b3] w-10 text-right">{volumePercent}%</span>
+        <button title="Lyrics" className="text-[#b3b3b3] hover:text-white transition-colors">
+          <MicIcon className="w-4 h-4" />
+        </button>
+        <button title="Queue" className="text-[#b3b3b3] hover:text-white transition-colors">
+          <QueueIcon className="w-4 h-4" />
+        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setMuted(!muted)}
+            title="Mute"
+            className="text-[#b3b3b3] hover:text-white transition-colors"
+          >
+            {muted || state.volume === 0 ? <VolumeMuteIcon className="w-4 h-4" /> : <VolumeIcon className="w-4 h-4" />}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={muted ? 0 : state.volume}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVolume(v);
+              setMuted(v === 0);
+            }}
+            className="spotify-range w-20"
+          />
+        </div>
+        <button title="Full screen" className="text-[#b3b3b3] hover:text-white transition-colors">
+          <FullscreenIcon className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

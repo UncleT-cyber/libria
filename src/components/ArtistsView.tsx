@@ -1,48 +1,45 @@
-import { useLibraryStore } from '../stores/library';
+import { useLibraryStore, type Track } from '../stores/library';
+import { usePlayerStore } from '../stores/player';
+import { MusicNoteIcon, PlayIcon } from './icons';
 
 export default function ArtistsView() {
   const { tracks } = useLibraryStore();
+  const { playTrack } = usePlayerStore();
 
-  // Group tracks by artist
   const artists = tracks.reduce((acc, track) => {
-    if (!acc[track.artist]) {
-      acc[track.artist] = {
-        name: track.artist,
-        albumCount: 0,
-        trackCount: 0,
-      };
-    }
-    acc[track.artist].trackCount++;
+    const key = track.artist || 'Unknown Artist';
+    if (!acc[key]) acc[key] = { name: key, first: track, count: 0 };
+    acc[key].count++;
     return acc;
-  }, {} as Record<string, { name: string; albumCount: number; trackCount: number }>);
-
-  const artistList = Object.values(artists);
+  }, {} as Record<string, { name: string; first: Track; count: number }>);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="p-6 border-b border-libria-elevated">
-        <h1 className="text-2xl font-light">Artists</h1>
-        <p className="text-libria-secondary mt-1">{artistList.length} artists</p>
-      </div>
-      
-      <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          {artistList.map((artist, index) => (
-            <div
-              key={index}
-              className="p-4 rounded-lg hover:bg-libria-surface cursor-pointer transition-colors text-center"
+    <div className="px-6 py-6">
+      <h1 className="text-2xl font-bold text-white mb-6">Artists</h1>
+      {Object.values(artists).length === 0 ? (
+        <p className="text-[#b3b3b3]">Artists you save will show up here.</p>
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-4">
+          {Object.values(artists).map((artist) => (
+            <button
+              key={artist.name}
+              onClick={() => playTrack(artist.first.id)}
+              className="bg-[#181818] hover:bg-[#282828] rounded-lg p-4 transition-colors text-left group"
             >
-              <div className="aspect-square bg-libria-elevated rounded-full mb-3 flex items-center justify-center mx-auto w-32 h-32">
-                <div className="text-libria-secondary text-4xl">🎤</div>
+              <div className="relative mb-3">
+                <div className="w-full aspect-square bg-[#282828] rounded-full shadow-lg flex items-center justify-center text-[#b3b3b3]">
+                  <MusicNoteIcon className="w-1/2 h-1/2" />
+                </div>
+                <span className="absolute right-2 bottom-2 w-11 h-11 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-lg transition-all duration-200">
+                  <PlayIcon className="w-5 h-5" />
+                </span>
               </div>
-              <div className="font-medium truncate">{artist.name}</div>
-              <div className="text-sm text-libria-secondary">
-                {artist.trackCount} songs
-              </div>
-            </div>
+              <div className="font-bold text-white truncate">{artist.name}</div>
+              <div className="text-sm text-[#b3b3b3] truncate">Artist • {artist.count} songs</div>
+            </button>
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }
