@@ -7,7 +7,8 @@ import {
   HomeIcon,
   HomeOutlineIcon,
   CloseIcon,
-  MoreIcon,
+  BellIcon,
+  FriendsIcon,
 } from './icons';
 import type { ViewName } from './Sidebar';
 
@@ -23,17 +24,16 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   const [menuOpen, setMenuOpen] = useState(false);
   const { tracks } = useLibraryStore();
 
-  // Single horizontal line: window controls (window title frame stand-in),
-  // breadcrumbs, unified global search, right-hand profile node.
+  // The header doubles as the window drag surface in the desktop shell:
+  // `-webkit-app-region: drag` lets the native OS frame (Electron/Tauri)
+  // own window controls; interactive children opt back out with `no-drag`.
+  const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
+  const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
+
   return (
-    <div className="sticky top-0 z-30 grid grid-cols-3 items-center px-4 py-2 bg-[#121212]/95 backdrop-blur">
-      {/* Left: window controls + historical breadcrumb arrows */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 px-2">
-          <span className="w-3 h-3 rounded-full bg-[#ff5f57]" title="Close" />
-          <span className="w-3 h-3 rounded-full bg-[#febc2e]" title="Minimize" />
-          <span className="w-3 h-3 rounded-full bg-[#28c840]" title="Zoom" />
-        </div>
+    <div style={drag} className="sticky top-0 z-30 grid grid-cols-3 items-center px-4 py-2 bg-[#121212]/95 backdrop-blur select-none">
+      {/* Left: historical breadcrumb arrows (window controls live on the OS frame) */}
+      <div className="flex items-center gap-2" style={noDrag}>
         <button
           disabled
           title="Go back"
@@ -51,7 +51,7 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
       </div>
 
       {/* Center: home key + unified global search */}
-      <div className="flex items-center justify-center gap-2 min-w-0">
+      <div className="flex items-center justify-center gap-2 min-w-0" style={noDrag}>
         <button
           onClick={() => onNavigate('home')}
           title="Home"
@@ -89,35 +89,59 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
         </div>
       </div>
 
-      {/* Right: profile node (overflow + avatar) */}
-      <div className="flex items-center justify-end gap-2 relative">
+      {/* Right: notification bell, friend activity, profile avatar + dropdown */}
+      <div className="flex items-center justify-end gap-3 relative" style={noDrag}>
         <button
-          onClick={() => setMenuOpen((v) => !v)}
-          title="More"
+          title="Notifications"
           className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#2a2a2a] transition-colors"
         >
-          <MoreIcon className="w-5 h-5" />
+          <BellIcon className="w-5 h-5" />
         </button>
         <button
-          onClick={onOpenSettings}
+          title="Friend Activity"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#2a2a2a] transition-colors"
+        >
+          <FriendsIcon className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => setMenuOpen((v) => !v)}
           title="Profile"
           className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1DB954] text-black text-sm font-bold hover:scale-105 transition-transform"
         >
           L
         </button>
         {menuOpen && (
-          <div className="absolute top-full right-0 mt-2 w-44 bg-[#282828] rounded-md shadow-2xl py-1 z-40">
-            <button
-              onClick={() => { setMenuOpen(false); onOpenSettings(); }}
-              className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
-            >
-              Settings
-            </button>
-            <div className="border-t border-[#3e3e3e] my-1" />
-            <div className="px-4 py-2 text-xs text-[#b3b3b3]">
-              {tracks.length} tracks in library
+          <>
+            <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
+            <div className="absolute top-full right-0 mt-2 w-44 bg-[#282828] rounded-md shadow-2xl py-1 z-40">
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+              >
+                Account
+              </button>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+              >
+                Profile
+              </button>
+              <button
+                onClick={() => { setMenuOpen(false); onOpenSettings(); }}
+                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+              >
+                Settings
+              </button>
+              <div className="border-t border-[#3e3e3e] my-1" />
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+              >
+                Log out
+              </button>
+              <div className="px-4 py-2 text-xs text-[#6a6a6a]">{tracks.length} tracks in library</div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

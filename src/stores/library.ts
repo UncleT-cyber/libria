@@ -12,6 +12,8 @@ export interface Track {
   duration: number;
   file_path: string;
   format: string;
+  artwork_url?: string;
+  explicit?: boolean;
 }
 
 export interface LibraryStats {
@@ -31,6 +33,8 @@ interface RawTrack {
   local_file_path: string | null;
   file_path?: string | null;
   format?: string;
+  artwork_url?: string | null;
+  explicit?: boolean | null;
 }
 
 const normalizeTrack = (raw: RawTrack): Track => ({
@@ -41,6 +45,8 @@ const normalizeTrack = (raw: RawTrack): Track => ({
   duration: raw.duration ?? (raw.duration_ms ? raw.duration_ms / 1000 : 0),
   file_path: raw.local_file_path ?? raw.file_path ?? '',
   format: raw.format ?? '',
+  artwork_url: raw.artwork_url ?? undefined,
+  explicit: raw.explicit ?? false,
 });
 
 interface LibraryStore {

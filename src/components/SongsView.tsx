@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useLibraryStore, type Track } from '../stores/library';
 import { usePlayerStore } from '../stores/player';
-import { PlayIcon, PauseIcon, MusicNoteIcon, ClockIcon, CloudIcon, DownloadIcon, MoreIcon, ShuffleIcon } from './icons';
+import { PlayIcon, PauseIcon, MusicNoteIcon, ClockIcon, CheckCircleIcon, MoreIcon, ShuffleIcon } from './icons';
 
 const fmt = (seconds: number) => {
   if (!seconds || !Number.isFinite(seconds)) return '–';
@@ -88,25 +88,41 @@ export function TrackTable({ rows, onAddMusic }: { rows: Track[]; onAddMusic?: (
                 )}
               </div>
 
-              {/* Title + art + artist */}
+              {/* Title + art + artist (archival is a subtle inline badge here) */}
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0">
-                  <MusicNoteIcon className="w-5 h-5" />
+                <div className="w-10 h-10 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
+                  {track.artwork_url ? (
+                    <img src={track.artwork_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <MusicNoteIcon className="w-5 h-5" />
+                  )}
                 </div>
-                <div className="min-w-0">
-                  <div className={`truncate font-medium ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
-                    {track.title}
+                <div className="min-w-0 flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className={`truncate font-medium flex items-center gap-1.5 ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
+                      {track.title}
+                      {track.explicit && (
+                        <span className="inline-flex items-center justify-center w-4 h-4 bg-[#b3b3b3] text-[#121212] text-[8px] font-bold rounded-sm flex-shrink-0" title="Explicit content">
+                          E
+                        </span>
+                      )}
+                    </div>
+                    <div className="truncate text-sm text-[#b3b3b3] flex items-center gap-1.5">
+                      {track.file_path && (
+                        <span title="Archived locally" className="flex-shrink-0">
+                          <CheckCircleIcon className="w-3.5 h-3.5 text-[#1DB954]" />
+                        </span>
+                      )}
+                      {track.artist}
+                    </div>
                   </div>
-                  <div className="truncate text-sm text-[#b3b3b3]">{track.artist}</div>
                 </div>
               </div>
 
-              {/* archive status */}
-              <div className="hidden sm:flex items-center text-[#b3b3b3]" title={track.file_path ? 'Archived locally' : 'Streaming, not yet archived'}>
-                {track.file_path ? (
-                  <DownloadIcon className="w-4 h-4 text-[#1DB954]" />
-                ) : (
-                  <CloudIcon className="w-4 h-4" />
+              {/* archive status: green check-circle for local tracks (streaming rows stay clean) */}
+              <div className="hidden sm:flex items-center text-[#b3b3b3]">
+                {track.file_path && (
+                  <CheckCircleIcon className="w-4 h-4 text-[#1DB954]" />
                 )}
               </div>
 

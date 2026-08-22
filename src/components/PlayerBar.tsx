@@ -3,7 +3,7 @@ import { useLibraryStore } from '../stores/library';
 import { useState } from 'react';
 import {
   PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
-  HeartIcon, HeartFilledIcon, MusicNoteIcon, MicIcon, QueueIcon,
+  HeartIcon, CheckCircleIcon, MusicNoteIcon, MicIcon, QueueIcon,
   VolumeIcon, VolumeMuteIcon, FullscreenIcon, NowPlayingIcon,
   MiniPlayerIcon, DeviceIcon,
 } from './icons';
@@ -54,11 +54,17 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
 
   return (
     <div className="h-[72px] flex-shrink-0 bg-black px-4 flex items-center justify-between gap-4">
-      {/* Left base deck: track snapshot + favorites heart */}
+      {/* Left (Track Info): cover thumbnail, title, artist, like/check */}
       <div className="flex items-center gap-3 w-[30%] min-w-[180px] max-w-sm">
-        <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0">
-          <MusicNoteIcon className="w-6 h-6" />
-        </div>
+        {activeTrack && (
+          <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
+            {activeTrack.artwork_url ? (
+              <img src={activeTrack.artwork_url} alt={activeTrack.album || activeTrack.title} className="w-full h-full object-cover" />
+            ) : (
+              <MusicNoteIcon className="w-6 h-6" />
+            )}
+          </div>
+        )}
         <div className="min-w-0">
           <button className="block text-sm text-white hover:underline truncate font-medium text-left max-w-full">
             {activeTrack?.title ?? 'Libria'}
@@ -67,14 +73,16 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
             {activeTrack?.artist ?? 'Select a track'}
           </button>
         </div>
-        <button
-          onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
-          disabled={!state.currentTrack}
-          title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
-          className={`flex-shrink-0 transition-colors disabled:opacity-40 ${isLiked ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
-        >
-          {isLiked ? <HeartFilledIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
-        </button>
+        {activeTrack && (
+          <button
+            onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
+            disabled={!state.currentTrack}
+            title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+            className={`flex-shrink-0 transition-colors ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
+          >
+            {isLiked ? <CheckCircleIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
+          </button>
+        )}
       </div>
 
       {/* Center core: tracking keys + progress (16px cushions, standard padding) */}
@@ -129,8 +137,8 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
         </div>
       </div>
 
-      {/* Right base deck: utility row on a strict horizontal baseline */}
-      <div className="flex items-center gap-4 w-[30%] justify-end min-w-[180px]">
+      {/* Right (Utility Icons): single horizontal baseline, 16px vectors */}
+      <div className="flex items-center gap-3 w-[30%] justify-end min-w-[180px] h-full">
         <button
           onClick={onToggleNowPlaying}
           title="Now playing view"
