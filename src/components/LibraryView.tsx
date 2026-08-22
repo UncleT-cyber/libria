@@ -31,8 +31,15 @@ export default function LibraryView() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-libria-error">Error: {typeof error === 'string' ? error : String(error)}</div>
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <h2 className="text-2xl font-semibold mb-2 text-libria-secondary">
+          Backend unavailable
+        </h2>
+        <p className="text-libria-secondary opacity-70 max-w-md text-center">
+          This shell is running without the Tauri desktop backend, so the library
+          couldn't be loaded. Start the app via `npm run tauri dev` on a machine
+          with a display to use the full player.
+        </p>
       </div>
     );
   }
