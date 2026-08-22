@@ -32,7 +32,7 @@ export default function LibraryView() {
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-libria-error">Error: {error}</div>
+        <div className="text-libria-error">Error: {typeof error === 'string' ? error : String(error)}</div>
       </div>
     );
   }

@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 
+const toMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 export interface Track {
   id: string;
   title: string;
@@ -39,7 +42,7 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
       const tracks = await invoke<Track[]>('get_library');
       set({ tracks, isLoading: false });
     } catch (error) {
-      set({ error: error as string, isLoading: false });
+      set({ error: toMessage(error), isLoading: false });
     }
   },
   
@@ -52,7 +55,7 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
       const tracks = await invoke<Track[]>('get_library');
       set({ tracks, isLoading: false });
     } catch (error) {
-      set({ error: error as string, isLoading: false });
+      set({ error: toMessage(error), isLoading: false });
     }
   },
   
@@ -65,7 +68,7 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
       const tracks = await invoke<Track[]>('get_library');
       set({ tracks, isLoading: false });
     } catch (error) {
-      set({ error: error as string, isLoading: false });
+      set({ error: toMessage(error), isLoading: false });
     }
   },
 }));
