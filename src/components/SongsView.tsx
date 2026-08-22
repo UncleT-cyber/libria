@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useLibraryStore, type Track } from '../stores/library';
 import { usePlayerStore } from '../stores/player';
-import { PlayIcon, PauseIcon, MusicNoteIcon, ClockIcon, CloudIcon, DownloadIcon, MoreIcon } from './icons';
+import { PlayIcon, PauseIcon, MusicNoteIcon, ClockIcon, CloudIcon, DownloadIcon, MoreIcon, ShuffleIcon } from './icons';
 
 const fmt = (seconds: number) => {
   if (!seconds || !Number.isFinite(seconds)) return '–';
@@ -179,9 +179,7 @@ export default function SongsView({ onAddMusic, query = '' }: { onAddMusic?: () 
           className={`relative transition-colors ${shuffle ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
           title="Enable shuffle"
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13.151.922a.75.75 0 1 0-1.06 1.06L13.109 3H11.16a3.75 3.75 0 0 0-2.873 1.34l-6.173 7.356A2.25 2.25 0 0 1 .39 12.5H0V14h.391a3.75 3.75 0 0 0 2.873-1.34l6.173-7.356a2.25 2.25 0 0 1 1.724-.804h1.947l-1.017 1.018a.75.75 0 0 0 1.06 1.06L15.98 3.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 0 0 .39 3.5zm7.547 8.03l-.994 1.185a.75.75 0 0 0 1.07 1.05l1.484-1.768-.99-1.18-.99 1.182zm8.79-8.932h-1.32a.75.75 0 0 0 0 1.5h1.32a2.25 2.25 0 0 1 1.724.804l2.3 2.74 1.06-1.06-2.39-2.844a3.75 3.75 0 0 0-2.873-1.34z" />
-          </svg>
+          <ShuffleIcon className="w-8 h-8" />
           {shuffle && <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />}
         </button>
       </div>

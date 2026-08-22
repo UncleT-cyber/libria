@@ -84,7 +84,19 @@ export const VolumeMuteIcon = (p: P) => (
 );
 
 export const FullscreenIcon = (p: P) => (
-  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m0 8v2a2 2 0 01-2 2h-2" /></svg>
+  <svg {...base(p)}><path d="M21.707 2.293a1 1 0 0 1 0 1.414L17.414 8l1.623 1.623a1 1 0 0 1-1.414 1.414L15 8.414l-2.623-2.623a1 1 0 0 1 1.414-1.414L15.414 6l4.293-4.293a1 1 0 0 1 1.414 0zM8.414 15l-1.623 1.623a1 1 0 0 1-1.414-1.414L7 13.586 2.707 9.293A1 1 0 0 1 2.293 7.707L6.586 12l2.623 2.623A1 1 0 0 1 8.414 15z" /><path d="M3 18h6v3H3a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1zm12 0h6v1a1 1 0 0 1-1 1h-5v-2z" /></svg>
+);
+
+export const ExpandIcon = (p: P) => (
+  <svg {...base(p)}><path d="M15 3h6v6h-2.5V5.561L11.707 12.354a1 1 0 0 1-1.414-1.414l6.793-6.793H15V3zM2.293 11.293 6.586 15.586l-1.414 1.414L2.293 18v-5.207a1 1 0 0 1 1.5-1.5zM21 15v6h-6v-2.5h3.44l-6.793-6.793a1 1 0 0 1 1.414-1.414l6.793 6.793V15H21z" /></svg>
+);
+
+export const MiniPlayerIcon = (p: P) => (
+  <svg {...base(p)}><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V5h14v14zm-7-7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" /></svg>
+);
+
+export const DeviceIcon = (p: P) => (
+  <svg {...base(p)}><path d="M4 3a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h16.5v1.5H4a2.5 2.5 0 0 1-2.5-2.5V4A2.5 2.5 0 0 1 4 1.5h17.5V3H4zm17 6.5a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-8.5a1 1 0 0 1 1-1h4zm-3 9.5a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5z" /></svg>
 );
 
 export const GearIcon = (p: P) => (

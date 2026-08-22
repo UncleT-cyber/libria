@@ -23,6 +23,8 @@ interface CommandMap {
   get_settings: { args: never; return: Record<string, string> };
   set_setting: { args: { key: string; value: string }; return: unknown };
   get_downloads: { args: never; return: [string, string][] };
+  get_favorites: { args: never; return: string[] };
+  toggle_favorite: { args: { track_id: string }; return: { favorites: string[] } };
   get_player_state: { args: never; return: unknown };
   play_track: { args: { trackId: string }; return: unknown };
   pause_playback: { args: never; return: unknown };
@@ -49,6 +51,7 @@ export async function invokeBackend<C extends Command>(
     'get_library_stats',
     'get_settings',
     'get_downloads',
+    'get_favorites',
     'get_player_state',
   ];
   if (GET_COMMANDS.includes(command)) {

@@ -46,9 +46,12 @@ const normalizeTrack = (raw: RawTrack): Track => ({
 interface LibraryStore {
   tracks: Track[];
   stats: LibraryStats | null;
+  favorites: string[];
   isLoading: boolean;
   error: string | null;
   fetchLibrary: () => Promise<void>;
+  fetchFavorites: () => Promise<void>;
+  toggleFavorite: (trackId: string) => Promise<void>;
   scanFolder: (folderPath: string) => Promise<void>;
   importFiles: (filePaths: string[]) => Promise<void>;
   importSpotify: (url: string) => Promise<void>;
@@ -57,9 +60,10 @@ interface LibraryStore {
 export const useLibraryStore = create<LibraryStore>((set) => ({
   tracks: [],
   stats: null,
+  favorites: [],
   isLoading: false,
   error: null,
-  
+
   fetchLibrary: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -68,6 +72,24 @@ export const useLibraryStore = create<LibraryStore>((set) => ({
       set({ tracks, isLoading: false });
     } catch (error) {
       set({ error: toMessage(error), isLoading: false });
+    }
+  },
+
+  fetchFavorites: async () => {
+    try {
+      const favorites = await invokeBackend('get_favorites');
+      set({ favorites });
+    } catch (error) {
+      set({ error: toMessage(error) });
+    }
+  },
+
+  toggleFavorite: async (trackId: string) => {
+    try {
+      const result = await invokeBackend('toggle_favorite', { track_id: trackId });
+      set({ favorites: result.favorites });
+    } catch (error) {
+      set({ error: toMessage(error) });
     }
   },
   

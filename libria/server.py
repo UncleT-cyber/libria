@@ -29,8 +29,8 @@ CORS_HEADERS = [
     ("Access-Control-Allow-Headers", "Content-Type, Range"),
 ]
 
-GET_ROUTES = {"get_library", "get_library_stats", "get_settings", "get_downloads"}
-POST_ROUTES = {"scan_folder", "import_files", "import_spotify", "set_setting"}
+GET_ROUTES = {"get_library", "get_library_stats", "get_settings", "get_downloads", "get_favorites"}
+POST_ROUTES = {"scan_folder", "import_files", "import_spotify", "set_setting", "toggle_favorite"}
 
 
 class ApiHandler(BaseHTTPRequestHandler):
@@ -71,6 +71,8 @@ class ApiHandler(BaseHTTPRequestHandler):
                 self._send_json(self._db().all_tracks())
             elif command == "get_library_stats":
                 self._send_json(library_stats(self._db()))
+            elif command == "get_favorites":
+                self._send_json(self._db().get_favorites())
             elif command == "get_settings":
                 self._send_json(self._db().all_settings())
             elif command == "get_downloads":
@@ -156,6 +158,8 @@ class ApiHandler(BaseHTTPRequestHandler):
             elif command == "set_setting":
                 self._db().set_setting(body["key"], str(body["value"]))
                 self._send_json({"key": body["key"], "value": str(body["value"])})
+            elif command == "toggle_favorite":
+                self._send_json({"favorites": self._db().toggle_favorite(body["track_id"])})
         except KeyError as exc:
             self._send_json({"error": f"missing field: {exc}"}, status=400)
         except Exception as exc:

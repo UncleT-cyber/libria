@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { invokeBackend } from '../api/backend';
+import { CloseIcon } from './icons';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -57,9 +58,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             onClick={onClose}
             className="text-[#b3b3b3] hover:text-white transition-colors p-2 hover:bg-[#282828] rounded-full"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <CloseIcon className="w-6 h-6" />
           </button>
         </div>
 

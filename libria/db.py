@@ -92,7 +92,7 @@ def normalize_track_id(ref: str) -> str:
 class Database:
     def __init__(self, path: str | Path):
         self._lock = threading.RLock()
-        self._conn = sqlite3.connect(str(path), check_same_thread=False)
+        self._conn = sqlite3.connect(str(path), check_same_thread=False, timeout=30)
         self._conn.row_factory = sqlite3.Row
         # Foreign-key enforcement is never optional on this connection.
         self._conn.execute("PRAGMA foreign_keys = ON;")
@@ -185,6 +185,21 @@ class Database:
                 (normalize_track_id(track_id),),
             ).fetchone()
         return row is not None
+
+    def toggle_favorite(self, track_id: str) -> list[str]:
+        normalized = normalize_track_id(track_id)
+        if self.is_favorite(normalized):
+            self.remove_favorite(normalized)
+        else:
+            self.add_favorite(normalized)
+        return self.get_favorites()
+
+    def get_favorites(self) -> list[str]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT track_id FROM favorites"
+            ).fetchall()
+        return [r[0] for r in rows]
 
     def favorite_tracks(self) -> list[dict]:
         with self._lock:

@@ -13,8 +13,9 @@ import AddMusicModal from './components/AddMusicModal';
 import SettingsModal from './components/SettingsModal';
 
 function App() {
-  const { fetchLibrary } = useLibraryStore();
+  const { fetchLibrary, fetchFavorites } = useLibraryStore();
   const [currentView, setCurrentView] = useState<ViewName>('home');
+  const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState('');
   const [showAddMusic, setShowAddMusic] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -22,12 +23,19 @@ function App() {
 
   useEffect(() => {
     fetchLibrary();
-  }, [fetchLibrary]);
+    fetchFavorites();
+  }, [fetchLibrary, fetchFavorites]);
+
+  const fullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen().catch(() => undefined);
+    }
+  };
 
   const renderView = () => {
     switch (currentView) {
-      case 'home':
-        return <HomeView />;
       case 'search':
         return <SongsView query={query} onAddMusic={() => setShowAddMusic(true)} />;
       case 'songs':
@@ -44,28 +52,39 @@ function App() {
   };
 
   return (
-    <div className="h-screen bg-black p-2 flex flex-col gap-2 overflow-hidden">
-      <div className="flex-1 flex gap-2 min-h-0">
+    <div className="h-screen bg-black flex flex-col overflow-hidden">
+      {/* Single unified header row: window controls / breadcrumbs / search / profile */}
+      <TopBar
+        currentView={currentView}
+        query={query}
+        onQueryChange={setQuery}
+        onNavigate={setCurrentView}
+        onOpenSettings={() => setShowSettings(true)}
+      />
+
+      {/* Workspace spans from under the header to the playback deck */}
+      <div className="flex-1 flex gap-2 px-2 min-h-0">
         <Sidebar
           currentView={currentView}
+          collapsed={collapsed}
           onViewChange={setCurrentView}
+          onToggleCollapse={() => setCollapsed((v) => !v)}
           onAddMusic={() => setShowAddMusic(true)}
         />
         <main className="flex-1 bg-[#121212] rounded-lg overflow-y-auto flex flex-col min-w-0">
-          <TopBar
-            currentView={currentView}
-            query={query}
-            onQueryChange={setQuery}
-            onOpenSettings={() => setShowSettings(true)}
-          />
           {renderView()}
         </main>
-        {showNowPlaying && <NowPlayingPanel />}
+        {showNowPlaying && (
+          <div className="p-0">
+            <NowPlayingPanel />
+          </div>
+        )}
       </div>
 
       <PlayerBar
         nowPlayingOpen={showNowPlaying}
         onToggleNowPlaying={() => setShowNowPlaying((v) => !v)}
+        onFullscreen={fullscreen}
       />
 
       <AddMusicModal isOpen={showAddMusic} onClose={() => setShowAddMusic(false)} />
