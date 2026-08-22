@@ -5,7 +5,7 @@ import { useRef } from 'react';
 
 export default function LibraryView() {
   const { tracks, isLoading, error } = useLibraryStore();
-  const { playTrack, state } = usePlayerStore();
+  const { playTrack } = usePlayerStore();
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({

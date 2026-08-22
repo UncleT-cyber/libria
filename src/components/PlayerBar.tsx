@@ -2,14 +2,13 @@ import { usePlayerStore } from '../stores/player';
 import { useState, useEffect } from 'react';
 
 export default function PlayerBar() {
-  const { state, playTrack, pausePlayback, stopPlayback, seekPlayback, setVolume, tick } = usePlayerStore();
-  const [isDragging, setIsDragging] = useState(false);
+  const { state, playTrack, pausePlayback, seekPlayback, setVolume, tick } = usePlayerStore();
   const [isLiked, setIsLiked] = useState(false);
   const [volumePercent, setVolumePercent] = useState(100);
 
   // Simulate playback progress
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (state.isPlaying) {
       interval = setInterval(() => {
         tick();

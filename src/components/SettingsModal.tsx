@@ -107,7 +107,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   onChange={(e) => setSettings({...settings, formatTemplate: e.target.value})}
                 />
                 <div className="text-xs text-[#b3b3b3] mt-1">
-                  Available: {Artist}, {Album}, {TrackNumber}, {Title}, {Year}
+                  Available: {'{Artist}'}, {'{Album}'}, {'{TrackNumber}'}, {'{Title}'}, {'{Year}'}
                 </div>
               </div>
             </div>

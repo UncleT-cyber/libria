@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useLibraryStore } from '../stores/library';
 import SettingsModal from './SettingsModal';
 
+type ViewName = 'library' | 'songs' | 'albums' | 'artists' | 'playlists';
+
 interface SidebarProps {
-  currentView: string;
-  onViewChange: (view: string) => void;
+  currentView: ViewName;
+  onViewChange: (view: ViewName) => void;
 }
 
 export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
@@ -69,7 +71,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     }
   };
 
-  const menuItems = [
+  const menuItems: { id: ViewName; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'library', label: 'Library', icon: HomeIcon },
     { id: 'songs', label: 'Songs', icon: MusicIcon },
     { id: 'albums', label: 'Albums', icon: AlbumIcon },
