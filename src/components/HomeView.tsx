@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLibraryStore, type Track } from '../stores/library';
 import { usePlayerStore } from '../stores/player';
 import { MusicNoteIcon, PlayIcon } from './icons';
@@ -60,26 +61,36 @@ function Card({ track, subtitle }: { track: Track; subtitle: string }) {
 
 export default function HomeView() {
   const { tracks } = useLibraryStore();
-  const quick = tracks.slice(0, 8);
-  const recent = tracks.slice(0, 10);
+  const topFilters = ['All', 'Music', 'Podcasts', 'Audiobooks'] as const;
+  const [activeTop, setActiveTop] = useState<(typeof topFilters)[number]>('All');
+
+  // Filter tracks by top pill (Music = all audio, Podcasts/Audiobooks filtered by title/album hints - placeholder until metadata)
+  const filteredByTop = tracks.filter((t) => {
+    if (activeTop === 'All') return true;
+    if (activeTop === 'Music') return !/podcast|audiobook/i.test(`${t.title} ${t.album}`);
+    if (activeTop === 'Podcasts') return /podcast/i.test(`${t.title} ${t.album} ${t.artist}`);
+    if (activeTop === 'Audiobooks') return /audiobook|audio book/i.test(`${t.title} ${t.album}`);
+    return true;
+  });
+  const quick = filteredByTop.slice(0, 8);
+  const recent = filteredByTop.slice(0, 10);
 
   const albums = Object.values(
-    tracks.reduce((acc, t) => {
+    filteredByTop.reduce((acc, t) => {
       if (t.album && !acc[t.album]) acc[t.album] = t;
       return acc;
     }, {} as Record<string, Track>)
   ).slice(0, 10);
 
-  const topFilters = ['All', 'Music', 'Podcasts', 'Audiobooks'] as const;
-
   return (
     <div className="px-6 pb-10">
       {/* Top filter pills - All/Music/Podcasts/Audiobooks as in Spotify reference */}
       <div className="flex gap-2 py-3 sticky top-0 bg-[#121212] z-10">
-        {topFilters.map((f, i) => (
+        {topFilters.map((f) => (
           <button
             key={f}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium h-8 ${i === 0 ? 'bg-white text-black' : 'bg-[#232323] text-white hover:bg-[#2a2a2a]'}`}
+            onClick={() => setActiveTop(f)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium h-8 transition-colors ${activeTop === f ? 'bg-white text-black' : 'bg-[#232323] text-white hover:bg-[#2a2a2a]'}`}
           >
             {f}
           </button>
