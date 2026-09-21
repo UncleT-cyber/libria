@@ -60,7 +60,7 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
   const progressPct = state.duration > 0 ? (state.position / state.duration) * 100 : 0;
 
   return (
-    <div className="h-[72px] flex-shrink-0 bg-black px-4 flex items-center justify-between gap-4">
+    <div className="h-[80px] flex-shrink-0 bg-black px-4 flex items-center justify-between gap-4 rounded-lg">
       {/* Left (Track Info): 56x56 cover, title 14px bold, artist 11px grey, heart stroke 2px */}
       <div className="flex items-center gap-3 w-[30%] min-w-[180px] max-w-sm">
         <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">

@@ -87,8 +87,8 @@ function App() {
   };
 
   return (
-    <div className="h-screen bg-black flex flex-col overflow-hidden">
-      {/* grid: top-nav 64px | main 1fr | player 90px */}
+    <div className="h-screen bg-black flex flex-col overflow-hidden gap-2 p-2">
+      {/* grid: top-nav 64px | main 1fr | player 80-90px with Spotify gap */}
       <div className="h-16 shrink-0">
         <TopBar
           currentView={currentView}
@@ -106,8 +106,8 @@ function App() {
         />
       </div>
 
-      {/* Workspace: sidebar | main | right-pane */}
-      <div className="flex-1 flex gap-2 px-2 min-h-0">
+      {/* Workspace: sidebar | main | right-pane - 8px gap from player */}
+      <div className="flex-1 flex gap-2 min-h-0">
         <Sidebar
           currentView={currentView}
           collapsed={collapsed}
@@ -131,22 +131,24 @@ function App() {
         ) : null}
       </div>
 
-      <div className="h-[90px] shrink-0">
-        <PlayerBar
-          nowPlayingOpen={showNowPlaying || activePane !== null || showListening}
-          onToggleNowPlaying={() => {
-            const next = !showNowPlaying;
-            setShowNowPlaying(next);
-            if (next) { setShowListening(false); setActivePane(null); }
-            setExpanded(false);
-          }}
-          activePane={activePane}
-          onToggleLyrics={() => togglePane('lyrics')}
-          onToggleQueue={() => togglePane('queue')}
-          onToggleDevice={() => togglePane('device')}
-          onToggleMini={handleMiniPlayer}
-          onFullscreen={fullscreen}
-        />
+      <div className="h-[90px] shrink-0 bg-black">
+        <div className="h-full bg-black rounded-lg flex items-center">
+          <PlayerBar
+            nowPlayingOpen={showNowPlaying || activePane !== null || showListening}
+            onToggleNowPlaying={() => {
+              const next = !showNowPlaying;
+              setShowNowPlaying(next);
+              if (next) { setShowListening(false); setActivePane(null); }
+              setExpanded(false);
+            }}
+            activePane={activePane}
+            onToggleLyrics={() => togglePane('lyrics')}
+            onToggleQueue={() => togglePane('queue')}
+            onToggleDevice={() => togglePane('device')}
+            onToggleMini={handleMiniPlayer}
+            onFullscreen={fullscreen}
+          />
+        </div>
       </div>
 
       <AddMusicModal isOpen={showAddMusic} onClose={() => setShowAddMusic(false)} />
