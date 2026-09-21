@@ -133,46 +133,52 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
         >
           <FriendsIcon className="w-5 h-5" />
         </button>
-        <button
-          onClick={() => setMenuOpen((v) => !v)}
-          title="Profile"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#19e68c] text-black text-sm font-bold ring-2 ring-black hover:scale-105 transition-transform overflow-hidden"
-        >
-          <span className="w-full h-full flex items-center justify-center bg-[#19e68c] text-black">O</span>
-        </button>
-        {menuOpen && (
-          <>
-            <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
-            <div className="absolute top-full right-0 mt-2 w-44 bg-[#282828] rounded-md shadow-2xl py-1 z-40">
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
-              >
-                Account
-              </button>
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
-              >
-                Profile
-              </button>
-              <button
-                onClick={() => { setMenuOpen(false); onOpenSettings(); }}
-                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
-              >
-                Settings
-              </button>
-              <div className="border-t border-[#3e3e3e] my-1" />
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
-              >
-                Log out
-              </button>
-              <div className="px-4 py-2 text-xs text-[#6a6a6a]">{tracks.length} tracks in library</div>
-            </div>
-          </>
-        )}
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            title="Profile - Anthony Abah"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#19e68c] text-black text-xs font-bold ring-2 ring-black hover:scale-105 hover:brightness-110 transition-all overflow-hidden cursor-pointer"
+          >
+            <span className="w-full h-full flex items-center justify-center bg-[#19e68c] text-black font-bold">AA</span>
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
+              <div className="absolute top-full right-0 mt-2 w-56 bg-[#282828] rounded-md shadow-2xl py-1 z-40 overflow-hidden">
+                <div className="px-4 py-3 border-b border-[#3e3e3e]">
+                  <div className="text-sm font-bold text-white">Anthony Abah</div>
+                  <div className="text-xs text-[#b3b3b3]">a.abah6082@miva.edu.ng</div>
+                </div>
+                <button
+                  onClick={() => { setMenuOpen(false); window.open('https://github.com/UncleT-cyber', '_blank'); }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+                >
+                  Account
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); onNavigate('home'); }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); onOpenSettings(); }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+                >
+                  Settings
+                </button>
+                <div className="border-t border-[#3e3e3e] my-1" />
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-[#3e3e3e] transition-colors"
+                >
+                  Log out
+                </button>
+                <div className="px-4 py-2 text-xs text-[#6a6a6a]">{tracks.length} tracks in library</div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
