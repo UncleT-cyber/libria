@@ -23,6 +23,7 @@ interface TopBarProps {
 
 export default function TopBar({ currentView, query, onQueryChange, onNavigate, onOpenSettings }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const { tracks } = useLibraryStore();
 
   // The header doubles as the window drag surface in the desktop shell:
@@ -31,20 +32,10 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
   const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
 
-  // Web preview shows mac window dots for pixel parity with reference; Tauri uses native frame (still drag surface)
-  const showWindowDots = typeof window !== 'undefined' && !(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
-
   return (
-    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 h-16 bg-black select-none">
-      {/* Left: window dots + navigation chevrons - same top row as Spotify reference */}
-      <div className="flex items-center gap-3" style={noDrag}>
-        {showWindowDots && (
-          <div className="flex items-center gap-2 mr-1">
-            <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
-            <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
-            <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
-          </div>
-        )}
+    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 h-16 bg-black select-none">
+      {/* Left: navigation chevrons - OS window controls are native (Tauri/browser chrome), not hardcoded dots */}
+      <div className="flex items-center gap-2" style={noDrag}>
         <button
           disabled
           title="Go back"
@@ -114,15 +105,31 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
 
       {/* Right: bell + friend activity + polished profile circle */}
       <div className="flex items-center justify-end gap-2 relative" style={noDrag}>
-        <button
-          title="Notifications"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:scale-105 transition-transform"
-        >
-          <BellIcon className="w-5 h-5" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setNotifOpen((v) => !v)}
+            title="Notifications"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] transition-colors relative"
+          >
+            <BellIcon className="w-5 h-5" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#3d91f4] rounded-full border border-black" />
+          </button>
+          {notifOpen && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setNotifOpen(false)} />
+              <div className="absolute top-full right-0 mt-2 w-80 bg-[#282828] rounded-lg shadow-2xl z-40 overflow-hidden">
+                <div className="p-4 border-b border-[#3e3e3e]">
+                  <h3 className="font-bold text-white">Notifications</h3>
+                  <p className="text-sm text-[#b3b3b3] mt-1">No new notifications</p>
+                </div>
+                <div className="p-4 text-sm text-[#b3b3b3] text-center py-8">You're all caught up</div>
+              </div>
+            </>
+          )}
+        </div>
         <button
           title="Friend Activity"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:scale-105 transition-transform"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] transition-colors"
         >
           <FriendsIcon className="w-5 h-5" />
         </button>
