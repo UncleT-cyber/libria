@@ -22,6 +22,11 @@ from typing import Optional
 
 from .db import Database
 from .sync import library_stats
+try:
+    from .supabase_client import get_db as get_supabase_db, is_supabase_configured
+except ImportError:
+    get_supabase_db = None  # type: ignore
+    is_supabase_configured = lambda: False  # type: ignore
 
 CORS_HEADERS = [
     ("Access-Control-Allow-Origin", "*"),
@@ -196,9 +201,13 @@ class ApiHandler(BaseHTTPRequestHandler):
 def create_server(db_path: Optional[str] = None, port: int = 12001,
                   download_manager=None, db: Optional[Database] = None) -> ThreadingHTTPServer:
     if db is None:
-        db_location = db_path or str(Path.home() / ".libria" / "libria.db")
-        Path(db_location).parent.mkdir(parents=True, exist_ok=True)
-        db = Database(db_location)
+        # Render + Supabase: use Postgres when SUPABASE_URL is set, else SQLite
+        if get_supabase_db is not None and is_supabase_configured():
+            db = get_supabase_db()  # type: ignore
+        else:
+            db_location = db_path or str(Path.home() / ".libria" / "libria.db")
+            Path(db_location).parent.mkdir(parents=True, exist_ok=True)
+            db = Database(db_location)
     server = ThreadingHTTPServer(("0.0.0.0", port), ApiHandler)
     server.db = db  # type: ignore[attr-defined]
     server.download_manager = download_manager  # type: ignore[attr-defined]
@@ -227,20 +236,26 @@ def _build_download_manager(db: Database):
 
 
 def main() -> None:
+    import os
     import sys
 
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 12001
+    # Render injects PORT=10000; local dev uses 12001 or argv[1]
+    port = int(os.getenv("PORT") or (sys.argv[1] if len(sys.argv) > 1 else 12001))
     db_path = sys.argv[2] if len(sys.argv) > 2 else None
-    db_location = db_path or str(Path.home() / ".libria" / "libria.db")
-    Path(db_location).parent.mkdir(parents=True, exist_ok=True)
-    db = Database(db_location)
+    # Prefer Supabase on Render/Vercel when env is set
+    if get_supabase_db is not None and is_supabase_configured():
+        db = get_supabase_db()  # type: ignore
+    else:
+        db_location = db_path or os.getenv("LIBRIA_DB_PATH") or str(Path.home() / ".libria" / "libria.db")
+        Path(db_location).parent.mkdir(parents=True, exist_ok=True)
+        db = Database(db_location)
     manager = None
     try:
         manager = _build_download_manager(db)
     except Exception as exc:  # queue is optional; API still serves without it
         print(f"download queue unavailable: {exc}")
-    server = create_server(db_path, port, download_manager=manager, db=db)
-    print(f"libria API listening on :{port}")
+    server = create_server(db_path if 'db_path' in locals() else None, port, download_manager=manager, db=db)
+    print(f"libria API listening on :{port} (supabase={'on' if is_supabase_configured() else 'off'})")
     server.serve_forever()
 
 

@@ -1,0 +1,33 @@
+# Render Blueprint for Libria Python backend + Supabase
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: libria-api
+    runtime: python
+    region: frankfurt # or oregon - closest to Supabase region
+    plan: starter # free tier works; upgrade for yt-dlp/FFmpeg disk
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m libria.server
+    # Render injects PORT=10000 automatically - server.py reads os.getenv("PORT")
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      # Supabase - set after you create Supabase project (supabase/schema.sql)
+      - key: SUPABASE_URL
+        sync: false # set in Render Dashboard -> Environment (secret)
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      # Spotify OAuth - must match Spotify Dashboard Redirect URIs
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      # -> set to your Vercel URL after first deploy
+      - key: SPOTIFY_REDIRECT_URI
+        sync: false
+      # Optional: keep Supabase as primary DB, fallback is /tmp/libria.db on Render ephemeral fs
+      - key: LIBRIA_DB_PATH
+        value: /tmp/libria.db
+    healthCheckPath: /api/health

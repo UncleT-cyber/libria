@@ -4,3 +4,8 @@ python-vlc>=3.0.20
 # alternate audio backend: pygame>=2.5
 # optional high-quality archiver used by the default download worker:
 yt-dlp>=2024.1.1
+# Vercel + Supabase web deployment
+supabase>=2.9
+python-dotenv>=1.0
+fastapi>=0.110
+uvicorn>=0.29

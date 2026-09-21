@@ -1,8 +1,11 @@
 import type { Track, LibraryStats } from '../stores/library';
 
-// Same-origin relative base: the Vite dev server proxies /api -> the Python
-// backend, so HTTPS hosting faces no mixed-content blocking.
-const API_BASE = '/api';
+// Vercel (frontend) + Render (backend) + Supabase (DB) split:
+// - Local dev: Vite proxies /api -> http://localhost:12001 (libria/server.py)
+// - Prod: VITE_API_URL=https://libria-api.onrender.com/api -> Render Python backend
+// Falls back to same-origin /api for Vercel serverless functions if present.
+const _rawBase = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_API_URL || '/api';
+const API_BASE = _rawBase.replace(/\/$/, ''); // strip trailing slash
 
 declare global {
   interface Window {
