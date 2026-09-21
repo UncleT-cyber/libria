@@ -27,15 +27,15 @@ export default function AlbumsView() {
               className="bg-[#181818] hover:bg-[#282828] rounded-lg p-4 transition-colors text-left group"
             >
               <div className="relative mb-3">
-                <div className="w-full aspect-square bg-[#282828] rounded-md shadow-lg flex items-center justify-center text-[#b3b3b3]">
-                  <MusicNoteIcon className="w-1/2 h-1/2" />
+                <div className="w-full aspect-square bg-[#282828] rounded-md shadow-[0_8px_24px_rgba(0,0,0,0.5)] flex items-center justify-center text-[#b3b3b3] overflow-hidden">
+                  {album.first.artwork_url ? <img src={album.first.artwork_url} alt="" className="w-full h-full object-cover rounded-md" /> : <MusicNoteIcon className="w-12 h-12" />}
                 </div>
-                <span className="absolute right-2 bottom-2 w-11 h-11 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-lg transition-all duration-200">
-                  <PlayIcon className="w-5 h-5" />
+                <span className="absolute right-2 bottom-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-200">
+                  <PlayIcon className="w-6 h-6 ml-0.5" />
                 </span>
               </div>
-              <div className="font-bold text-white truncate">{album.title}</div>
-              <div className="text-sm text-[#b3b3b3] truncate">{album.artist} • {album.count} songs</div>
+              <div className="text-[16px] font-bold text-white truncate leading-5">{album.title}</div>
+              <div className="text-[14px] text-[#a7a7a7] truncate leading-5">{album.artist} • {album.count} songs</div>
             </button>
           ))}
         </div>

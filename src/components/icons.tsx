@@ -169,3 +169,20 @@ export const FriendsIcon = (p: P) => (
 export const ExternalLinkIcon = (p: P) => (
   <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3" /></svg>
 );
+
+// Spotify browse / show-library panel icon (rectangle with right-pane line)
+export const BrowseIcon = (p: P) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18M15 8h4M15 12h4M15 16h4" /></svg>
+);
+export const SidebarRightIcon = (p: P) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M15 3v18" /></svg>
+);
+export const ListSortIcon = (p: P) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><path strokeLinecap="round" d="M3 6h12M3 12h9M3 18h6" /><path d="M17 8l3 3-3 3M17 16l3 3-3 3" /></svg>
+);
+export const PinIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a2.5 2.5 0 0 0-2.45 2.04L5 8l-2.2 2.2a.5.5 0 0 0 .7.7L6 8.5V13a1 1 0 0 0 2 0V8.5l2.5 2.5a.5.5 0 0 0 .7-.7L9 8l-.55-5.96A2.5 2.5 0 0 0 8 0z" /></svg>
+);
+export const ExpandArrowIcon = (p: P) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+);

@@ -54,22 +54,22 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
 
   return (
     <div className="h-[72px] flex-shrink-0 bg-black px-4 flex items-center justify-between gap-4">
-      {/* Left (Track Info): cover thumbnail, title, artist, like/check */}
+      {/* Left (Track Info): 56x56 cover, title 14px bold, artist 11px grey, heart stroke 2px */}
       <div className="flex items-center gap-3 w-[30%] min-w-[180px] max-w-sm">
-        {activeTrack && (
-          <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
-            {activeTrack.artwork_url ? (
-              <img src={activeTrack.artwork_url} alt={activeTrack.album || activeTrack.title} className="w-full h-full object-cover" />
-            ) : (
-              <MusicNoteIcon className="w-6 h-6" />
-            )}
-          </div>
-        )}
-        <div className="min-w-0">
-          <button className="block text-sm text-white hover:underline truncate font-medium text-left max-w-full">
+        <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
+          {activeTrack?.artwork_url ? (
+            <img src={activeTrack.artwork_url} alt={activeTrack.album || activeTrack.title} className="w-full h-full object-cover" />
+          ) : activeTrack ? (
+            <MusicNoteIcon className="w-6 h-6" />
+          ) : (
+            <MusicNoteIcon className="w-6 h-6 opacity-50" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <button className="block text-[14px] leading-5 text-white hover:underline truncate font-normal text-left max-w-full">
             {activeTrack?.title ?? 'Libria'}
           </button>
-          <button className="block text-[11px] text-[#b3b3b3] hover:text-white hover:underline truncate text-left max-w-full">
+          <button className="block text-[11px] leading-4 text-[#a7a7a7] hover:text-white hover:underline truncate text-left max-w-full">
             {activeTrack?.artist ?? 'Select a track'}
           </button>
         </div>
@@ -78,62 +78,63 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
             onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
             disabled={!state.currentTrack}
             title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
-            className={`flex-shrink-0 transition-colors ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
+            className={`flex-shrink-0 p-1 transition-colors ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
           >
             {isLiked ? <CheckCircleIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
           </button>
         )}
+        {/* always reserve space for PiP placeholder when no track */}
       </div>
 
-      {/* Center core: tracking keys + progress (16px cushions, standard padding) */}
-      <div className="flex flex-col items-center gap-1 w-[40%] max-w-2xl">
+      {/* Center core: 32px white play circle, 16px gaps, 4px timeline + handle */}
+      <div className="flex flex-col items-center gap-2 w-[40%] max-w-[722px]">
         <div className="flex items-center">
           <button
             onClick={toggleShuffle}
             title="Enable shuffle"
-            className={`relative mx-4 transition-colors ${shuffle ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+            className={`relative w-8 h-8 flex items-center justify-center transition-colors ${shuffle ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
           >
             <ShuffleIcon className="w-4 h-4" />
-            {shuffle && <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />}
+            {shuffle && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />}
           </button>
-          <button onClick={() => playNeighbor(-1)} title="Previous" className="mx-4 text-[#b3b3b3] hover:text-white transition-colors">
+          <button onClick={() => playNeighbor(-1)} title="Previous" className="w-8 h-8 flex items-center justify-center text-[#b3b3b3] hover:text-white transition-colors">
             <PrevIcon className="w-4 h-4" />
           </button>
           <button
             onClick={togglePlay}
             title={state.isPlaying ? 'Pause' : 'Play'}
-            className="mx-4 w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform"
+            className="mx-2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 hover:bg-[#f0f0f0] transition-all shadow-sm"
           >
-            {state.isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
+            {state.isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4 ml-0.5" />}
           </button>
-          <button onClick={() => playNeighbor(1)} title="Next" className="mx-4 text-[#b3b3b3] hover:text-white transition-colors">
+          <button onClick={() => playNeighbor(1)} title="Next" className="w-8 h-8 flex items-center justify-center text-[#b3b3b3] hover:text-white transition-colors">
             <NextIcon className="w-4 h-4" />
           </button>
           <button
             onClick={cycleRepeat}
             title={repeatMode === 'one' ? 'Repeat one' : repeatMode === 'all' ? 'Enable repeat' : 'Enable repeat one'}
-            className={`relative mx-4 transition-colors ${repeatMode !== 'off' ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+            className={`relative w-8 h-8 flex items-center justify-center transition-colors ${repeatMode !== 'off' ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
           >
             <RepeatIcon className="w-4 h-4" />
             {repeatMode !== 'off' && (
-              <span className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 ${repeatMode === 'one' ? 'text-[8px] font-bold' : 'w-1 h-1 rounded-full bg-[#1DB954]'}`}>
+              <span className={`absolute -bottom-1 left-1/2 -translate-x-1/2 ${repeatMode === 'one' ? 'text-[8px] font-bold leading-none' : 'w-1 h-1 rounded-full bg-[#1DB954]'}`}>
                 {repeatMode === 'one' ? '1' : ''}
               </span>
             )}
           </button>
         </div>
-        <div className="w-full flex items-center gap-2 text-xs text-[#b3b3b3]">
-          <span className="w-10 text-right">{fmt(state.position)}</span>
+        <div className="w-full flex items-center gap-2 text-[11px] text-[#a7a7a7] font-normal">
+          <span className="w-10 text-right tabular-nums">{fmt(state.position)}</span>
           <input
             type="range"
             min={0}
             max={Math.floor(state.duration) || 0}
             value={Math.floor(Math.min(state.position, state.duration))}
             onChange={(e) => seekPlayback(Number(e.target.value))}
-            className="spotify-range flex-1"
+            className="spotify-range flex-1 h-1"
             style={{ background: `linear-gradient(to right, #fff ${pct(progressPct)}, #4d4d4d ${pct(progressPct)})` }}
           />
-          <span className="w-10">{fmt(state.duration)}</span>
+          <span className="w-10 tabular-nums">{fmt(state.duration)}</span>
         </div>
       </div>
 

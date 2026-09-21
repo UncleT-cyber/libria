@@ -10,9 +10,12 @@ const greeting = () => {
   return 'Good evening';
 };
 
-function TrackArt({ size = 'w-16 h-16' }: { size?: string }) {
+function TrackArt({ track, size = 'w-12 h-12' }: { track?: Track; size?: string }) {
+  if (track?.artwork_url) {
+    return <img src={track.artwork_url} alt="" className={`${size} object-cover flex-shrink-0 rounded-sm`} />;
+  }
   return (
-    <div className={`${size} bg-[#282828] flex items-center justify-center text-[#b3b3b3] flex-shrink-0`}>
+    <div className={`${size} bg-[#282828] flex items-center justify-center text-[#b3b3b3] flex-shrink-0 rounded-sm`}>
       <MusicNoteIcon className="w-1/2 h-1/2" />
     </div>
   );
@@ -23,12 +26,12 @@ function QuickTile({ track }: { track: Track }) {
   return (
     <button
       onClick={() => playTrack(track.id)}
-      className="flex items-center bg-[#2a2a2a] hover:bg-[#404040] rounded overflow-hidden transition-colors text-left group relative"
+      className="flex items-center bg-[#2a2a2a] hover:bg-[#3e3e3e] rounded-md overflow-hidden transition-colors text-left group relative h-16"
     >
-      <TrackArt />
-      <span className="px-4 font-bold text-white truncate">{track.title}</span>
-      <span className="absolute right-3 w-11 h-11 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 group-hover:opacity-100 shadow-lg transition-opacity">
-        <PlayIcon className="w-5 h-5" />
+      <TrackArt track={track} size="w-16 h-16" />
+      <span className="px-4 font-bold text-white text-sm truncate pr-14">{track.title}</span>
+      <span className="absolute right-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-200">
+        <PlayIcon className="w-6 h-6 ml-0.5" />
       </span>
     </button>
   );
@@ -39,18 +42,18 @@ function Card({ track, subtitle }: { track: Track; subtitle: string }) {
   return (
     <button
       onClick={() => playTrack(track.id)}
-      className="w-44 flex-shrink-0 bg-[#181818] hover:bg-[#282828] rounded-lg p-4 transition-colors text-left group"
+      className="w-[160px] sm:w-[180px] flex-shrink-0 bg-[#181818] hover:bg-[#282828] rounded-lg p-3 transition-colors text-left group"
     >
       <div className="relative">
-        <div className="w-full aspect-square bg-[#282828] rounded-md shadow-lg flex items-center justify-center text-[#b3b3b3]">
-          <MusicNoteIcon className="w-1/2 h-1/2" />
+        <div className="w-full aspect-square bg-[#282828] rounded-md shadow-[0_8px_24px_rgba(0,0,0,0.5)] flex items-center justify-center text-[#b3b3b3] overflow-hidden">
+          {track.artwork_url ? <img src={track.artwork_url} alt="" className="w-full h-full object-cover rounded-md" /> : <MusicNoteIcon className="w-12 h-12" />}
         </div>
-        <span className="absolute right-2 bottom-2 w-11 h-11 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-lg transition-all duration-200">
-          <PlayIcon className="w-5 h-5" />
+        <span className="absolute right-2 bottom-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center text-black opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-200">
+          <PlayIcon className="w-6 h-6 ml-0.5" />
         </span>
       </div>
-      <div className="mt-3 font-bold text-white truncate">{track.title}</div>
-      <div className="text-sm text-[#b3b3b3] truncate">{subtitle}</div>
+      <div className="mt-3 text-[16px] font-bold text-white truncate leading-5">{track.title}</div>
+      <div className="text-[14px] text-[#a7a7a7] truncate leading-5">{subtitle}</div>
     </button>
   );
 }

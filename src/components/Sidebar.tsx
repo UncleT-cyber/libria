@@ -5,6 +5,10 @@ import {
   PlusIcon,
   MusicNoteIcon,
   PlayIcon,
+  SearchIcon,
+  ExpandArrowIcon,
+  ListSortIcon,
+  PinIcon,
 } from './icons';
 
 export type ViewName = 'home' | 'search' | 'songs' | 'albums' | 'artists' | 'playlists';
@@ -29,38 +33,47 @@ export default function Sidebar({ currentView, collapsed, onViewChange, onToggle
   const { state, playTrack } = usePlayerStore();
   const width = collapsed ? 'w-[72px]' : 'w-80';
   const chip = (active: boolean) =>
-    `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+    `px-4 py-1.5 rounded-full text-sm font-medium transition-colors leading-none h-8 inline-flex items-center ${
       active ? 'bg-white text-black' : 'bg-[#232323] text-white hover:bg-[#2a2a2a]'
     }`;
 
   return (
     <aside className={`${width} flex-shrink-0 flex flex-col bg-[#121212] rounded-lg transition-all duration-200 min-h-0`}>
-      {/* Header: clicking the Library icon or label toggles collapse */}
-      <div className={`flex items-center pt-3 pb-2 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
+      {/* Header: bookshelf icon + Your Library + Plus + Expand Arrow */}
+      <div className={`flex items-center h-14 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
         <button
           onClick={onToggleCollapse}
           title={collapsed ? 'Expand Your Library' : 'Collapse Your Library'}
-          className={`flex items-center gap-3 text-base font-bold transition-colors ${
+          className={`flex items-center gap-3 text-[16px] font-bold transition-colors ${
             currentView === 'songs' && !collapsed ? 'text-white' : 'text-[#b3b3b3] hover:text-white'
           }`}
         >
-          <LibraryIcon />
+          <span className="w-6 h-6 flex items-center justify-center"><LibraryIcon className="w-6 h-6" /></span>
           {!collapsed && <span>Your Library</span>}
         </button>
         {!collapsed && (
-          <button
-            onClick={onAddMusic}
-            title="Add music"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a] transition-colors"
-          >
-            <PlusIcon className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onAddMusic}
+              title="Add music"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a] transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onToggleCollapse}
+              title="Expand Your Library"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a] transition-colors"
+            >
+              <ExpandArrowIcon className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Filter chips (expanded only) */}
+      {/* Filter pills: 16px radius, #282828 bg, 8px 16px padding, active white/black */}
       {!collapsed && (
-        <div className="flex gap-2 px-4 pb-2 overflow-x-auto">
+        <div className="flex gap-2 px-2 pb-3 overflow-x-auto scrollbar-none">
           {CHIPS.map((c) => (
             <button key={c.id} className={chip(currentView === c.id)} onClick={() => onViewChange(c.id)}>
               {c.label}
@@ -76,6 +89,19 @@ export default function Sidebar({ currentView, collapsed, onViewChange, onToggle
         >
           <PlusIcon className="w-5 h-5" />
         </button>
+      )}
+
+      {/* Sub-header: search + Recents sort */}
+      {!collapsed && (
+        <div className="flex items-center justify-between px-2 py-2">
+          <button className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323] transition-colors" title="Search in Your Library">
+            <SearchIcon className="w-4 h-4" />
+          </button>
+          <button className="flex items-center gap-2 text-sm text-[#b3b3b3] hover:text-white transition-colors pr-2" title="Sort">
+            <span>Recents</span>
+            <ListSortIcon className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
       {/* Items */}
@@ -96,6 +122,7 @@ export default function Sidebar({ currentView, collapsed, onViewChange, onToggle
         ) : (
           tracks.map((track) => {
             const isCurrent = state.currentTrack === track.id;
+            const isPinned = track.id === tracks[0]?.id && !!track.file_path;
             return (
               <button
                 key={track.id}
@@ -107,20 +134,27 @@ export default function Sidebar({ currentView, collapsed, onViewChange, onToggle
                     : 'w-full flex items-center gap-3 p-2 rounded-md hover:bg-[#1a1a1a] transition-colors text-left group'
                 }
               >
-                <div className="w-12 h-12 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 relative">
-                  <MusicNoteIcon className="w-5 h-5" />
+                <div className="w-12 h-12 bg-[#282828] rounded-[4px] flex items-center justify-center text-[#b3b3b3] flex-shrink-0 relative overflow-hidden">
+                  {track.artwork_url ? (
+                    <img src={track.artwork_url} alt="" className="w-full h-full object-cover rounded-[4px]" />
+                  ) : (
+                    <MusicNoteIcon className="w-5 h-5" />
+                  )}
                   {!collapsed && (
-                    <div className="absolute inset-0 bg-black/60 rounded opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <div className="absolute inset-0 bg-black/60 rounded-[4px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                       <PlayIcon className="w-5 h-5 text-white" />
                     </div>
                   )}
                 </div>
                 {!collapsed && (
-                  <div className="min-w-0">
-                    <div className={`truncate font-medium ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
+                  <div className="min-w-0 flex-1">
+                    <div className={`truncate text-[14px] leading-5 font-normal ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>
                       {track.title}
                     </div>
-                    <div className="truncate text-sm text-[#b3b3b3]">Song • {track.artist}</div>
+                    <div className="truncate text-[12px] leading-4 text-[#a7a7a7] flex items-center gap-1.5">
+                      {isPinned && <PinIcon className="w-3 h-3 text-[#1DB954] shrink-0" />}
+                      <span>Song • {track.artist}</span>
+                    </div>
                   </div>
                 )}
               </button>

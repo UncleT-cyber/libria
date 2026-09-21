@@ -53,16 +53,18 @@ function App() {
 
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden">
-      {/* Single unified header row: window controls / breadcrumbs / search / profile */}
-      <TopBar
-        currentView={currentView}
-        query={query}
-        onQueryChange={setQuery}
-        onNavigate={setCurrentView}
-        onOpenSettings={() => setShowSettings(true)}
-      />
+      {/* grid: top-nav 64px | main 1fr | player 90px */}
+      <div className="h-16 shrink-0">
+        <TopBar
+          currentView={currentView}
+          query={query}
+          onQueryChange={setQuery}
+          onNavigate={setCurrentView}
+          onOpenSettings={() => setShowSettings(true)}
+        />
+      </div>
 
-      {/* Workspace spans from under the header to the playback deck */}
+      {/* Workspace: sidebar | main | right-pane */}
       <div className="flex-1 flex gap-2 px-2 min-h-0">
         <Sidebar
           currentView={currentView}
@@ -75,17 +77,19 @@ function App() {
           {renderView()}
         </main>
         {showNowPlaying && (
-          <div className="p-0">
+          <div className="p-0 w-[280px] shrink-0">
             <NowPlayingPanel />
           </div>
         )}
       </div>
 
-      <PlayerBar
-        nowPlayingOpen={showNowPlaying}
-        onToggleNowPlaying={() => setShowNowPlaying((v) => !v)}
-        onFullscreen={fullscreen}
-      />
+      <div className="h-[90px] shrink-0">
+        <PlayerBar
+          nowPlayingOpen={showNowPlaying}
+          onToggleNowPlaying={() => setShowNowPlaying((v) => !v)}
+          onFullscreen={fullscreen}
+        />
+      </div>
 
       <AddMusicModal isOpen={showAddMusic} onClose={() => setShowAddMusic(false)} />
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />

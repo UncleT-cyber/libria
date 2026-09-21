@@ -44,7 +44,7 @@ body {
   background-color: #606060;
 }
 
-/* Spotify-style range sliders: 4px track, hidden thumb until hover */
+/* Spotify-style range sliders: 4px track, hidden thumb until hover, 12px handle */
 .spotify-range {
   -webkit-appearance: none;
   appearance: none;
@@ -61,6 +61,7 @@ body {
   background: #fff;
   opacity: 0;
   transition: opacity 0.1s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 .spotify-range::-moz-range-thumb {
   width: 12px;
@@ -70,6 +71,7 @@ body {
   background: #fff;
   opacity: 0;
   transition: opacity 0.1s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 .spotify-range:hover::-webkit-slider-thumb,
 .spotify-range:active::-webkit-slider-thumb {
@@ -78,6 +80,9 @@ body {
 .spotify-range:hover::-moz-range-thumb,
 .spotify-range:active::-moz-range-thumb {
   opacity: 1;
+}
+.spotify-range:hover {
+  background: #4d4d4d;
 }
 
 /* Playing-track equalizer bars (Spotify's green animation) */
