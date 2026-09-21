@@ -32,7 +32,7 @@ interface PlayerBarProps {
 
 export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullscreen, activePane, onToggleLyrics, onToggleQueue, onToggleDevice, onToggleMini }: PlayerBarProps) {
   const {
-    state, playTrack, pausePlayback, seekPlayback, setVolume,
+    state, playTrack, pausePlayback, stopPlayback, seekPlayback, setVolume,
     shuffle, repeatMode, toggleShuffle, cycleRepeat,
   } = usePlayerStore();
   const { tracks, favorites, toggleFavorite } = useLibraryStore();
@@ -73,30 +73,54 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <button className="block text-[14px] leading-5 text-white hover:underline truncate font-normal text-left max-w-full">
+          <button
+            onClick={() => {
+              if (activeTrack) {
+                // focus now playing or replay
+                if (state.currentTrack) playTrack(activeTrack.id);
+              }
+            }}
+            title={activeTrack ? `Open ${activeTrack.title}` : 'Your library'}
+            className="block text-[14px] leading-5 text-white hover:underline truncate font-normal text-left max-w-full cursor-pointer"
+          >
             {activeTrack?.title ?? 'Libria'}
           </button>
-          <button className="block text-[11px] leading-4 text-[#a7a7a7] hover:text-white hover:underline truncate text-left max-w-full">
+          <button
+            onClick={() => {
+              if (activeTrack) playTrack(activeTrack.id);
+            }}
+            title={activeTrack ? activeTrack.artist : 'Select a track from Your Library'}
+            className="block text-[11px] leading-4 text-[#a7a7a7] hover:text-white hover:underline truncate text-left max-w-full cursor-pointer"
+          >
             {activeTrack?.artist ?? 'Select a track'}
           </button>
         </div>
-        {activeTrack && (
+        {activeTrack ? (
           <>
             <button
               onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
-              disabled={!state.currentTrack}
-              title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
-              className={`flex-shrink-0 p-1 transition-colors ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
+              title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs (favorites)'}
+              className={`flex-shrink-0 p-1 transition-colors cursor-pointer ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
             >
               {isLiked ? <CheckCircleIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
             </button>
-            <button title="Close" className="w-6 h-6 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white transition-colors">
+            <button
+              onClick={() => stopPlayback()}
+              title="Close / Stop playback"
+              className="w-6 h-6 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323] transition-colors cursor-pointer"
+            >
               <span className="text-sm leading-none">×</span>
             </button>
-            <button title="Add to playlist" className="w-6 h-6 flex items-center justify-center rounded-full bg-[#2a2a2a] text-[#b3b3b3] hover:text-white hover:bg-[#3e3e3e] transition-colors">
-              <span className="text-sm leading-none">+</span>
+            <button
+              onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
+              title={isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs'}
+              className={`w-6 h-6 flex items-center justify-center rounded-full transition-colors cursor-pointer ${isLiked ? 'bg-[#1DB954] text-black hover:bg-[#1ed760]' : 'bg-[#2a2a2a] text-[#b3b3b3] hover:text-white hover:bg-[#3e3e3e]'}`}
+            >
+              <span className="text-sm leading-none font-bold">{isLiked ? '✓' : '+'}</span>
             </button>
           </>
+        ) : (
+          <span className="text-xs text-[#6a6a6a] hidden xl:block">No track</span>
         )}
       </div>
 
