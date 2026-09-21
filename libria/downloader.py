@@ -42,23 +42,46 @@ class DownloadJob:
 
 def yt_dlp_archiver(job: DownloadJob, dest_dir: str) -> str:
     """Default archiver: fetch best-quality audio with yt-dlp. Injected as a
-    dependency so tests (or alternate downloaders) can replace it."""
+    dependency so tests (or alternate downloaders) can replace it.
+
+    Spotify URLs are DRM - we translate them to a YouTube search via
+    ytsearch1:\"{title} {artist}\" so the user gets the matching audio
+    without needing Spotify Premium.
+    """
     import yt_dlp  # lazy: heavyweight optional dependency
 
     Path(dest_dir).mkdir(parents=True, exist_ok=True)
     outtmpl = str(Path(dest_dir) / "%(title)s-%(id)s.%(ext)s")
-    options = {
+    # Spotify direct URLs always fail (DRM) - search YouTube instead
+    is_spotify = "spotify.com" in job.url or job.url.startswith("spotify:")
+    if is_spotify:
+        query = f"{job.metadata.get('title','').strip()} {job.metadata.get('artist','').strip()}".strip()
+        # fallback to album or raw id if title missing (oEmbed failed)
+        if not query or len(query) < 3:
+            query = job.metadata.get('album') or job.track_id
+        target = f"ytsearch1:{query} audio"
+    else:
+        target = job.url
+
+    import shutil
+    has_ffmpeg = shutil.which("ffmpeg") is not None
+    options: dict = {
         "format": "bestaudio/best",
         "outtmpl": outtmpl,
         "quiet": True,
-        "postprocessors": [{
+        "noplaylist": True,
+    }
+    if has_ffmpeg:
+        options["postprocessors"] = [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "mp3",
             "preferredquality": "320",
-        }],
-    }
+        }]
     with yt_dlp.YoutubeDL(options) as ydl:
-        info = ydl.extract_info(job.url, download=True)
+        info = ydl.extract_info(target, download=True)
+        # ytsearch returns dict with entries
+        if info and "entries" in info and info["entries"]:
+            info = info["entries"][0]
         base = Path(ydl.prepare_filename(info))
         candidate = base.with_suffix(".mp3")
         return str(candidate if candidate.exists() else base)

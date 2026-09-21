@@ -90,6 +90,24 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
     playTrack: async (trackId: string) => {
       if (!isTauri) {
+        // Guard: album placeholders (album:...) and stream-only tracks have no file yet -> 404
+        // Check via /api/audio HEAD or via library store before attempting playback.
+        try {
+          const head = await fetch(audioUrl(trackId), { method: 'HEAD' });
+          if (!head.ok) {
+            const isAlbum = trackId.startsWith('album:') || trackId.startsWith('playlist:');
+            const hint = isAlbum
+              ? 'Album placeholder - paste individual track URLs or wait for yt-dlp search'
+              : 'Not yet downloaded - wait for archiver or re-import (check /api/get_downloads)';
+            console.warn(`Browser playback unavailable for track ${trackId}: ${head.status} ${hint}`);
+            set((state) => ({
+              state: { ...state.state, isPlaying: false, currentTrack: trackId, position: 0, duration: 0 },
+            }));
+            return;
+          }
+        } catch {
+          // HEAD failed (CORS/network) - fall through to audio.play attempt
+        }
         const audio = getAudio();
         audio.src = audioUrl(trackId);
         attachAudio(audio);

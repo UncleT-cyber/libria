@@ -59,6 +59,38 @@ class ApiHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", "0")
         self.end_headers()
 
+    def do_HEAD(self) -> None:  # for player pre-check (HEAD /api/audio/:id)
+        if self.path == "/api/health":
+            body = json.dumps({"status": "ok"}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            for k, v in CORS_HEADERS:
+                self.send_header(k, v)
+            self.end_headers()
+            return
+        parts = urllib.parse.urlparse(self.path).path.strip("/").split("/")
+        if len(parts) == 3 and parts[0] == "api" and parts[1] == "audio":
+            # HEAD for audio - just check existence without body
+            track_id = urllib.parse.unquote(parts[2])
+            record = self._db().get_track(track_id)
+            path = (record or {}).get("local_file_path")
+            if not path or not Path(path).is_file():
+                self._send_json({"error": "no local archive for track"}, status=404)
+                return
+            full_path = Path(path)
+            mime = mimetypes.guess_type(full_path.name)[0] or "application/octet-stream"
+            self.send_response(200)
+            self.send_header("Content-Type", mime)
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Content-Length", str(full_path.stat().st_size))
+            for k, v in CORS_HEADERS:
+                self.send_header(k, v)
+            self.end_headers()
+            return
+        # fallback to GET handling for other HEADs
+        self.do_GET()
+
     def do_GET(self) -> None:
         if self.path == "/api/health":
             self._send_json({"status": "ok"})
