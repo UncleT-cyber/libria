@@ -99,7 +99,7 @@ export default function NowPlayingPanel() {
             <div className="bg-[#242424] rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-bold text-white">Related music videos</span>
-                <span className="text-sm text-[#b3b3b3] hover:underline cursor-pointer">Show all</span>
+                <span className="text-sm text-[#1ED760] font-bold hover:underline cursor-pointer">Show all</span>
               </div>
               <button className="w-full flex items-center gap-3 text-left group">
                 <div className="w-24 h-14 bg-black rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 relative overflow-hidden">
@@ -117,7 +117,7 @@ export default function NowPlayingPanel() {
           <div className="bg-[#242424] rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-white">Credits</span>
-              <span className="text-sm text-[#b3b3b3] hover:underline cursor-pointer">Show all</span>
+              <span className="text-sm text-[#1ED760] font-bold hover:underline cursor-pointer">Show all</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="min-w-0">

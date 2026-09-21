@@ -110,7 +110,7 @@ export default function HomeView() {
         <section className="mb-10">
           <div className="flex items-end justify-between mb-3">
             <h2 className="text-2xl font-bold text-white hover:underline cursor-pointer">Recently added</h2>
-            <span className="text-sm font-bold text-[#b3b3b3] hover:underline cursor-pointer">Show all</span>
+            <span className="text-sm font-bold text-[#1ED760] hover:underline cursor-pointer">Show all</span>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {recent.map((t) => (
@@ -124,7 +124,7 @@ export default function HomeView() {
         <section className="mb-10">
           <div className="flex items-end justify-between mb-3">
             <h2 className="text-2xl font-bold text-white hover:underline cursor-pointer">Your albums</h2>
-            <span className="text-sm font-bold text-[#b3b3b3] hover:underline cursor-pointer">Show all</span>
+            <span className="text-sm font-bold text-[#1ED760] hover:underline cursor-pointer">Show all</span>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {albums.map((t) => (
