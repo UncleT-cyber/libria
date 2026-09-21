@@ -89,7 +89,7 @@ function App() {
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden gap-2 p-2">
       {/* grid: top-nav 64px | main 1fr | player 80-90px with Spotify gap */}
-      <div className="h-16 shrink-0">
+      <div className="h-14 shrink-0">
         <TopBar
           currentView={currentView}
           query={query}

@@ -36,43 +36,43 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   const isTauriWindow = typeof window !== 'undefined' && !!(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
 
   return (
-    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 h-16 bg-black select-none">
-      {/* Left: navigation chevrons - Tauri Overlay traffic lights at 12,20 sit inside this 64px bar */}
-      <div className={`flex items-center gap-2 ${isTauriWindow ? 'pl-[76px]' : ''}`} style={noDrag}>
+    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 h-14 bg-black select-none">
+      {/* Left: navigation chevrons - Tauri Overlay traffic lights at 12,20 sit inside this bar */}
+      <div className={`flex items-center gap-1.5 ${isTauriWindow ? 'pl-[76px]' : ''}`} style={noDrag}>
         <button
           disabled
           title="Go back"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-black text-white disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <ChevronLeftIcon className="w-5 h-5 shrink-0" />
+          <ChevronLeftIcon className="w-4 h-4 shrink-0" />
         </button>
         <button
           disabled
           title="Go forward"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-black/70 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-black/70 text-white disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <ChevronRightIcon className="w-5 h-5 shrink-0" />
+          <ChevronRightIcon className="w-4 h-4 shrink-0" />
         </button>
       </div>
 
-      {/* Center: home pill + search pill (40px height, 9999 radius) */}
+      {/* Center: home pill + search pill - reduced to fit */}
       <div className="flex items-center justify-center gap-2 min-w-0" style={noDrag}>
         <button
           onClick={() => onNavigate('home')}
           title="Home"
-          className={`w-12 h-12 flex items-center justify-center rounded-full shrink-0 transition-colors ${
+          className={`w-10 h-10 flex items-center justify-center rounded-full shrink-0 transition-colors ${
             currentView === 'home' ? 'bg-white text-black' : 'bg-[#242424] text-white hover:bg-[#2a2a2a]'
           }`}
         >
-          {currentView === 'home' ? <HomeIcon className="w-6 h-6" /> : <HomeOutlineIcon className="w-6 h-6" />}
+          {currentView === 'home' ? <HomeIcon className="w-5 h-5" /> : <HomeOutlineIcon className="w-5 h-5" />}
         </button>
-        <div className="relative w-[480px] max-w-[min(480px,40vw)] h-12 flex items-center bg-[#242424] hover:bg-[#2a2a2a] focus-within:bg-[#2a2a2a] rounded-full border border-transparent focus-within:border-white transition-colors group">
+        <div className="relative w-[460px] max-w-[min(460px,38vw)] h-10 flex items-center bg-[#242424] hover:bg-[#2a2a2a] focus-within:bg-[#2a2a2a] rounded-full border border-transparent focus-within:border-white transition-colors group">
           <button
             onClick={() => onNavigate('search')}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-white"
             title="Search"
           >
-            <SearchIcon className="w-5 h-5" />
+            <SearchIcon className="w-4 h-4" />
           </button>
           <input
             type="text"
@@ -80,42 +80,42 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
             onFocus={() => onNavigate('search')}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="What do you want to play?"
-            className="w-full bg-transparent text-white pl-12 pr-[88px] h-full rounded-full text-[16px] font-medium outline-none placeholder-[#b3b3b3] placeholder:font-normal"
+            className="w-full bg-transparent text-white pl-10 pr-[80px] h-full rounded-full text-[14px] font-medium outline-none placeholder-[#b3b3b3] placeholder:font-normal"
           />
           {/* right cluster: divider + browse icon + clear */}
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
             {query ? (
               <button
                 onClick={() => onQueryChange('')}
                 title="Clear search"
                 className="text-[#b3b3b3] hover:text-white transition-colors p-1"
               >
-                <CloseIcon className="w-5 h-5" />
+                <CloseIcon className="w-4 h-4" />
               </button>
             ) : (
-              <div className="w-px h-6 bg-[#3e3e3e] mx-1" />
+              <div className="w-px h-5 bg-[#3e3e3e] mx-1" />
             )}
             <button
               onClick={() => onNavigate('search')}
               title="Browse"
-              className="w-8 h-8 flex items-center justify-center text-[#b3b3b3] hover:text-white transition-colors"
+              className="w-7 h-7 flex items-center justify-center text-[#b3b3b3] hover:text-white transition-colors"
             >
-              <BrowseIcon className="w-5 h-5" />
+              <BrowseIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Right: bell + friend activity + polished profile circle */}
-      <div className="flex items-center justify-end gap-2 relative" style={noDrag}>
+      {/* Right: bell + friend activity + polished profile circle - reduced */}
+      <div className="flex items-center justify-end gap-1.5 relative" style={noDrag}>
         <div className="relative">
           <button
             onClick={() => setNotifOpen((v) => !v)}
             title="Notifications"
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] transition-colors relative"
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] transition-colors relative"
           >
-            <BellIcon className="w-5 h-5" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#3d91f4] rounded-full border border-black" />
+            <BellIcon className="w-4 h-4" />
+            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-[#3d91f4] rounded-full border border-black" />
           </button>
           {notifOpen && (
             <>
@@ -133,15 +133,15 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
         <button
           onClick={onToggleListening}
           title="Listening activity"
-          className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors relative ${listeningOpen ? 'bg-white text-black' : 'bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]'}`}
+          className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors relative ${listeningOpen ? 'bg-white text-black' : 'bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]'}`}
         >
-          <FriendsIcon className="w-5 h-5" />
+          <FriendsIcon className="w-4 h-4" />
         </button>
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
             title="Profile - Anthony Abah"
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#19e68c] text-black text-xs font-bold ring-2 ring-black hover:scale-105 hover:brightness-110 transition-all overflow-hidden cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-[#19e68c] text-black text-[11px] font-bold ring-2 ring-black hover:scale-105 hover:brightness-110 transition-all overflow-hidden cursor-pointer"
           >
             <span className="w-full h-full flex items-center justify-center bg-[#19e68c] text-black font-bold">AA</span>
           </button>
