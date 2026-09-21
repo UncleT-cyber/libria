@@ -92,23 +92,46 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
 
     playTrack: async (trackId: string) => {
       if (!isTauri) {
-        // Guard: album placeholders (album:...) and stream-only tracks have no file yet -> 404
-        // Check via /api/audio HEAD or via library store before attempting playback.
+        // Local storage first-stream auto-download: POST /api/play_track triggers ytsearch download if needed, waits up to 15s
+        try {
+          const base = audioUrl(trackId).split('/audio/')[0] || '/api';
+          const res = await fetch(`${base}/play_track`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ track_id: trackId }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            console.warn(`Auto-download failed for ${trackId}:`, data?.error);
+            set((state) => ({
+              state: { ...state.state, isPlaying: false, currentTrack: trackId, position: 0, duration: 0 },
+            }));
+            return;
+          }
+          if (!data.archived) {
+            // Still queued (large download) - poll get_downloads briefly then fallback to streaming hint
+            console.log(`Track ${trackId} queued for download (first stream), status:`, data.status);
+            // Fall through to audio attempt - will 404 until file ready, but next play will succeed (local storage)
+          }
+        } catch {
+          // /api/play_track failed - fall through to direct audio attempt for backward compat
+        }
+        // Guard: HEAD check after auto-download attempt
         try {
           const head = await fetch(audioUrl(trackId), { method: 'HEAD' });
           if (!head.ok) {
             const isAlbum = trackId.startsWith('album:') || trackId.startsWith('playlist:');
             const hint = isAlbum
-              ? 'Album placeholder - paste individual track URLs or wait for yt-dlp search'
-              : 'Not yet downloaded - wait for archiver or re-import (check /api/get_downloads)';
-            console.warn(`Browser playback unavailable for track ${trackId}: ${head.status} ${hint}`);
+              ? 'Album placeholder - paste individual track URLs'
+              : 'Download queued - first stream saves to ~/Music/libria, wait a few seconds then press play again';
+            console.warn(`Playback pending for ${trackId}: ${head.status} ${hint}`);
             set((state) => ({
               state: { ...state.state, isPlaying: false, currentTrack: trackId, position: 0, duration: 0 },
             }));
             return;
           }
         } catch {
-          // HEAD failed (CORS/network) - fall through to audio.play attempt
+          // HEAD failed - fall through
         }
         const audio = getAudio();
         audio.src = audioUrl(trackId);
@@ -125,7 +148,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
             };
           });
         } catch (error) {
-          // No local archive (stream-only track) or decode failure: surface as idle.
           console.warn('Browser playback unavailable for track:', trackId, error);
           set((state) => {
             const prev = state.state.currentTrack;

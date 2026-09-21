@@ -35,7 +35,7 @@ CORS_HEADERS = [
 ]
 
 GET_ROUTES = {"get_library", "get_library_stats", "get_settings", "get_downloads", "get_favorites"}
-POST_ROUTES = {"scan_folder", "import_files", "import_spotify", "set_setting", "toggle_favorite"}
+POST_ROUTES = {"scan_folder", "import_files", "import_spotify", "set_setting", "toggle_favorite", "play_track"}
 
 
 class ApiHandler(BaseHTTPRequestHandler):
@@ -197,6 +197,43 @@ class ApiHandler(BaseHTTPRequestHandler):
                 self._send_json({"key": body["key"], "value": str(body["value"])})
             elif command == "toggle_favorite":
                 self._send_json({"favorites": self._db().toggle_favorite(body["track_id"])})
+            elif command == "play_track":
+                track_id = body.get("track_id") or body.get("trackId")
+                if not track_id:
+                    self._send_json({"error": "missing track_id"}, status=400)
+                    return
+                track = self._db().get_track(track_id)
+                if not track:
+                    self._send_json({"error": "track not found"}, status=404)
+                    return
+                # Auto-download on first stream: if no local file, enqueue via ytsearch and return queued
+                path = track.get("local_file_path")
+                is_archived = bool(path and Path(path).is_file())
+                manager = getattr(self.server, "download_manager", None)
+                status_map = getattr(self.server, "download_status", None)
+                if not is_archived and manager is not None:
+                    manager.request_track(track, play_now=False)
+                    if status_map is not None:
+                        status_map[track_id] = "queued"
+                    # poll briefly for fast cache (yt-dlp may finish in seconds)
+                    import time
+                    for _ in range(30):
+                        time.sleep(0.5)
+                        fresh = self._db().get_track(track_id)
+                        fp = (fresh or {}).get("local_file_path")
+                        if fp and Path(fp).is_file():
+                            track = fresh
+                            is_archived = True
+                            break
+                        st = (status_map or {}).get(track_id) if status_map is not None else None
+                        if st == "error":
+                            break
+                self._send_json({
+                    "track": self._db().get_track(track_id),
+                    "archived": is_archived,
+                    "audio_url": f"/api/audio/{track_id}" if is_archived else None,
+                    "status": (status_map or {}).get(track_id) if status_map is not None else None,
+                })
         except KeyError as exc:
             self._send_json({"error": f"missing field: {exc}"}, status=400)
         except Exception as exc:
