@@ -9,6 +9,7 @@ import ArtistsView from './components/ArtistsView';
 import PlaylistsView from './components/PlaylistsView';
 import PlayerBar from './components/PlayerBar';
 import NowPlayingPanel from './components/NowPlayingPanel';
+import ListeningActivityPanel from './components/ListeningActivityPanel';
 import AddMusicModal from './components/AddMusicModal';
 import SettingsModal from './components/SettingsModal';
 
@@ -20,6 +21,7 @@ function App() {
   const [showAddMusic, setShowAddMusic] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
+  const [showListening, setShowListening] = useState(false);
 
   useEffect(() => {
     fetchLibrary();
@@ -61,6 +63,8 @@ function App() {
           onQueryChange={setQuery}
           onNavigate={setCurrentView}
           onOpenSettings={() => setShowSettings(true)}
+          onToggleListening={() => setShowListening((v) => !v)}
+          listeningOpen={showListening}
         />
       </div>
 
@@ -76,11 +80,13 @@ function App() {
         <main className="flex-1 bg-[#121212] rounded-lg overflow-y-auto flex flex-col min-w-0">
           {renderView()}
         </main>
-        {showNowPlaying && (
+        {showListening ? (
+          <ListeningActivityPanel onClose={() => setShowListening(false)} onOpenSettings={() => setShowSettings(true)} />
+        ) : showNowPlaying ? (
           <div className="p-0 w-[280px] shrink-0">
             <NowPlayingPanel />
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="h-[90px] shrink-0">

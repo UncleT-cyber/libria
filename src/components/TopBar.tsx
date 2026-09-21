@@ -19,9 +19,11 @@ interface TopBarProps {
   onQueryChange: (q: string) => void;
   onNavigate: (view: ViewName) => void;
   onOpenSettings: () => void;
+  onToggleListening?: () => void;
+  listeningOpen?: boolean;
 }
 
-export default function TopBar({ currentView, query, onQueryChange, onNavigate, onOpenSettings }: TopBarProps) {
+export default function TopBar({ currentView, query, onQueryChange, onNavigate, onOpenSettings, onToggleListening, listeningOpen }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const { tracks } = useLibraryStore();
@@ -128,8 +130,9 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
           )}
         </div>
         <button
-          title="Friend Activity"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] transition-colors"
+          onClick={onToggleListening}
+          title="Listening activity"
+          className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors relative ${listeningOpen ? 'bg-white text-black' : 'bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]'}`}
         >
           <FriendsIcon className="w-5 h-5" />
         </button>
