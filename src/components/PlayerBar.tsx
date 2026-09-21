@@ -74,16 +74,23 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
           </button>
         </div>
         {activeTrack && (
-          <button
-            onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
-            disabled={!state.currentTrack}
-            title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
-            className={`flex-shrink-0 p-1 transition-colors ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
-          >
-            {isLiked ? <CheckCircleIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
-          </button>
+          <>
+            <button
+              onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
+              disabled={!state.currentTrack}
+              title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+              className={`flex-shrink-0 p-1 transition-colors ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
+            >
+              {isLiked ? <CheckCircleIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
+            </button>
+            <button title="Close" className="w-6 h-6 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white transition-colors">
+              <span className="text-sm leading-none">×</span>
+            </button>
+            <button title="Add to playlist" className="w-6 h-6 flex items-center justify-center rounded-full bg-[#2a2a2a] text-[#b3b3b3] hover:text-white hover:bg-[#3e3e3e] transition-colors">
+              <span className="text-sm leading-none">+</span>
+            </button>
+          </>
         )}
-        {/* always reserve space for PiP placeholder when no track */}
       </div>
 
       {/* Center core: 32px white play circle, 16px gaps, 4px timeline + handle */}

@@ -70,8 +70,21 @@ export default function HomeView() {
     }, {} as Record<string, Track>)
   ).slice(0, 10);
 
+  const topFilters = ['All', 'Music', 'Podcasts', 'Audiobooks'] as const;
+
   return (
     <div className="px-6 pb-10">
+      {/* Top filter pills - All/Music/Podcasts/Audiobooks as in Spotify reference */}
+      <div className="flex gap-2 py-3 sticky top-0 bg-[#121212] z-10">
+        {topFilters.map((f, i) => (
+          <button
+            key={f}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium h-8 ${i === 0 ? 'bg-white text-black' : 'bg-[#232323] text-white hover:bg-[#2a2a2a]'}`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
       <h1 className="text-3xl font-bold text-white mb-4 mt-2">{greeting()}</h1>
 
       {quick.length > 0 && (

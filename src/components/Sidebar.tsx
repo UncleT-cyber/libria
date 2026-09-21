@@ -22,10 +22,9 @@ interface SidebarProps {
 }
 
 const CHIPS: { id: ViewName; label: string }[] = [
-  { id: 'songs', label: 'All' },
   { id: 'playlists', label: 'Playlists' },
-  { id: 'artists', label: 'Artists' },
   { id: 'albums', label: 'Albums' },
+  { id: 'artists', label: 'Artists' },
 ];
 
 export default function Sidebar({ currentView, collapsed, onViewChange, onToggleCollapse, onAddMusic }: SidebarProps) {

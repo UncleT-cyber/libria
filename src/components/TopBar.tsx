@@ -31,10 +31,20 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
   const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
 
+  // Web preview shows mac window dots for pixel parity with reference; Tauri uses native frame (still drag surface)
+  const showWindowDots = typeof window !== 'undefined' && !(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
+
   return (
-    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 h-16 bg-black select-none">
-      {/* Left: navigation chevrons - 32px circles, vertically centered with search */}
-      <div className="flex items-center gap-2" style={noDrag}>
+    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 h-16 bg-black select-none">
+      {/* Left: window dots + navigation chevrons - same top row as Spotify reference */}
+      <div className="flex items-center gap-3" style={noDrag}>
+        {showWindowDots && (
+          <div className="flex items-center gap-2 mr-1">
+            <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+            <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+            <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
+          </div>
+        )}
         <button
           disabled
           title="Go back"
