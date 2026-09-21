@@ -1,8 +1,14 @@
 {
   "name": "libria",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "author": "Anthony Abah <a.abah6082@miva.edu.ng> (https://github.com/UncleT-cyber)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UncleT-cyber/libria.git"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

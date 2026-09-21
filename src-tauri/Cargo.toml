@@ -2,9 +2,9 @@
 name = "libria"
 version = "0.1.0"
 description = "Your music. Your library. Your way."
-authors = ["Libria"]
+authors = ["Anthony Abah <a.abah6082@miva.edu.ng>"]
 license = "MIT"
-repository = ""
+repository = "https://github.com/UncleT-cyber/libria"
 edition = "2021"
 rust-version = "1.77.2"
 
