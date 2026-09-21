@@ -13,6 +13,7 @@ interface PlayerStore {
   state: PlayerState;
   shuffle: boolean;
   repeatMode: 'off' | 'all' | 'one';
+  history: string[];
   playTrack: (trackId: string) => Promise<void>;
   pausePlayback: () => Promise<void>;
   stopPlayback: () => Promise<void>;
@@ -81,6 +82,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     },
     shuffle: false,
     repeatMode: 'off',
+    history: [],
 
     toggleShuffle: () => set((s) => ({ shuffle: !s.shuffle })),
     cycleRepeat: () =>
@@ -114,30 +116,45 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
         audio.volume = get().state.volume;
         try {
           await audio.play();
-          set((state) => ({
-            state: { ...state.state, isPlaying: true, currentTrack: trackId, position: 0 },
-          }));
+          set((state) => {
+            const prev = state.state.currentTrack;
+            const hist = prev && prev !== trackId ? [prev, ...state.history.filter((id) => id !== prev && id !== trackId)].slice(0, 10) : state.history;
+            return {
+              state: { ...state.state, isPlaying: true, currentTrack: trackId, position: 0 },
+              history: hist,
+            };
+          });
         } catch (error) {
           // No local archive (stream-only track) or decode failure: surface as idle.
           console.warn('Browser playback unavailable for track:', trackId, error);
-          set((state) => ({
-            state: { ...state.state, isPlaying: false, currentTrack: trackId, position: 0, duration: 0 },
-          }));
+          set((state) => {
+            const prev = state.state.currentTrack;
+            const hist = prev && prev !== trackId ? [prev, ...state.history.filter((id) => id !== prev && id !== trackId)].slice(0, 10) : state.history;
+            return {
+              state: { ...state.state, isPlaying: false, currentTrack: trackId, position: 0, duration: 0 },
+              history: hist,
+            };
+          });
         }
         return;
       }
       try {
         const { invoke } = await import('@tauri-apps/api/core');
         await invoke('play_track', { trackId });
-        set((state) => ({
-          state: {
-            ...state.state,
-            isPlaying: true,
-            currentTrack: trackId,
-            position: 0,
-            duration: 0, // Will be set by actual audio player
-          },
-        }));
+        set((state) => {
+          const prev = state.state.currentTrack;
+          const hist = prev && prev !== trackId ? [prev, ...state.history.filter((id) => id !== prev && id !== trackId)].slice(0, 10) : state.history;
+          return {
+            state: {
+              ...state.state,
+              isPlaying: true,
+              currentTrack: trackId,
+              position: 0,
+              duration: 0,
+            },
+            history: hist,
+          };
+        });
 
         // Start progress simulation (will be replaced by real audio player)
         const interval = setInterval(() => {

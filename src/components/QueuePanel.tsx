@@ -10,10 +10,13 @@ interface Props {
 
 export default function QueuePanel({ onClose, expanded, onToggleExpand }: Props) {
   const { tracks } = useLibraryStore();
-  const { state, playTrack } = usePlayerStore();
+  const { state, history, playTrack } = usePlayerStore();
   const currentIdx = tracks.findIndex((t) => t.id === state.currentTrack);
   const nextUp = currentIdx >= 0 ? tracks.slice(currentIdx + 1, currentIdx + 6) : tracks.slice(0, 5);
   const queue = tracks.filter((_, i) => i !== currentIdx).slice(0, 10);
+  const recentlyPlayed = history
+    .map((id) => tracks.find((t) => t.id === id))
+    .filter(Boolean) as typeof tracks;
 
   return (
     <aside className={`${expanded ? 'w-[420px]' : 'w-[350px]'} flex-shrink-0 flex flex-col bg-[#121212] rounded-lg overflow-hidden transition-all duration-200`}>
@@ -52,6 +55,25 @@ export default function QueuePanel({ onClose, expanded, onToggleExpand }: Props)
               <button key={t.id} onClick={() => playTrack(t.id)} className="w-full flex items-center gap-3 p-2 hover:bg-[#1a1a1a] rounded-md text-left group">
                 <div className="w-12 h-12 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
                   {t.artwork_url ? <img src={t.artwork_url} alt="" className="w-full h-full object-cover" /> : <MusicNoteIcon className="w-5 h-5" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm text-white truncate group-hover:text-[#1DB954]">{t.title}</div>
+                  <div className="text-xs text-[#b3b3b3] truncate">{t.artist}</div>
+                </div>
+                <PlayIcon className="w-4 h-4 text-white opacity-0 group-hover:opacity-100" />
+              </button>
+            ))
+          )}
+        </div>
+        <div className="px-2">
+          <h3 className="text-sm font-bold text-white mb-2">Recently played</h3>
+          {recentlyPlayed.length === 0 ? (
+            <p className="text-sm text-[#6a6a6a] px-2">No recently played tracks yet.</p>
+          ) : (
+            recentlyPlayed.slice(0, 5).map((t) => (
+              <button key={t.id} onClick={() => playTrack(t.id)} className="w-full flex items-center gap-3 p-2 hover:bg-[#1a1a1a] rounded-md text-left group">
+                <div className="w-10 h-10 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
+                  {t.artwork_url ? <img src={t.artwork_url} alt="" className="w-full h-full object-cover" /> : <MusicNoteIcon className="w-4 h-4" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm text-white truncate group-hover:text-[#1DB954]">{t.title}</div>
