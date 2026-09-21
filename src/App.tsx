@@ -10,6 +10,9 @@ import PlaylistsView from './components/PlaylistsView';
 import PlayerBar from './components/PlayerBar';
 import NowPlayingPanel from './components/NowPlayingPanel';
 import ListeningActivityPanel from './components/ListeningActivityPanel';
+import LyricsPanel from './components/LyricsPanel';
+import QueuePanel from './components/QueuePanel';
+import DevicePanel from './components/DevicePanel';
 import AddMusicModal from './components/AddMusicModal';
 import SettingsModal from './components/SettingsModal';
 
@@ -22,6 +25,8 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [showListening, setShowListening] = useState(false);
+  const [activePane, setActivePane] = useState<'lyrics' | 'queue' | 'device' | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     fetchLibrary();
@@ -33,6 +38,34 @@ function App() {
       document.exitFullscreen();
     } else {
       document.documentElement.requestFullscreen().catch(() => undefined);
+    }
+  };
+
+  const togglePane = (pane: 'lyrics' | 'queue' | 'device') => {
+    setActivePane((cur) => (cur === pane ? null : pane));
+    setShowListening(false);
+    setShowNowPlaying(false);
+  };
+
+  const handleMiniPlayer = async () => {
+    try {
+      // Use Document Picture-in-Picture if available, else fallback to mini window
+      const w = window as unknown as { documentPictureInPicture?: { requestWindow: (opts: { width: number; height: number }) => Promise<Window> } };
+      if (w.documentPictureInPicture?.requestWindow) {
+        const pipWin = await w.documentPictureInPicture.requestWindow({ width: 400, height: 200 });
+        pipWin.document.body.innerHTML = `<div style="background:#121212;color:white;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">Libria Mini Player</div>`;
+      } else if (document.pictureInPictureEnabled) {
+        const video = document.querySelector('video');
+        if (video && (video as unknown as { requestPictureInPicture: () => Promise<void> }).requestPictureInPicture) {
+          await (video as unknown as { requestPictureInPicture: () => Promise<void> }).requestPictureInPicture();
+        } else {
+          window.open(window.location.href, 'LibriaMini', 'width=400,height=200');
+        }
+      } else {
+        window.open(window.location.href, 'LibriaMini', 'width=400,height=200');
+      }
+    } catch {
+      window.open(window.location.href, 'LibriaMini', 'width=400,height=200');
     }
   };
 
@@ -63,7 +96,12 @@ function App() {
           onQueryChange={setQuery}
           onNavigate={setCurrentView}
           onOpenSettings={() => setShowSettings(true)}
-          onToggleListening={() => setShowListening((v) => !v)}
+          onToggleListening={() => {
+            const next = !showListening;
+            setShowListening(next);
+            if (next) { setShowNowPlaying(false); setActivePane(null); }
+            setExpanded(false);
+          }}
           listeningOpen={showListening}
         />
       </div>
@@ -81,18 +119,32 @@ function App() {
           {renderView()}
         </main>
         {showListening ? (
-          <ListeningActivityPanel onClose={() => setShowListening(false)} onOpenSettings={() => setShowSettings(true)} />
+          <ListeningActivityPanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setShowListening(false)} onOpenSettings={() => setShowSettings(true)} />
+        ) : activePane === 'lyrics' ? (
+          <LyricsPanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setActivePane(null)} />
+        ) : activePane === 'queue' ? (
+          <QueuePanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setActivePane(null)} />
+        ) : activePane === 'device' ? (
+          <DevicePanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setActivePane(null)} />
         ) : showNowPlaying ? (
-          <div className="p-0 w-[280px] shrink-0">
-            <NowPlayingPanel />
-          </div>
+          <NowPlayingPanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setShowNowPlaying(false)} />
         ) : null}
       </div>
 
       <div className="h-[90px] shrink-0">
         <PlayerBar
-          nowPlayingOpen={showNowPlaying}
-          onToggleNowPlaying={() => setShowNowPlaying((v) => !v)}
+          nowPlayingOpen={showNowPlaying || activePane !== null || showListening}
+          onToggleNowPlaying={() => {
+            const next = !showNowPlaying;
+            setShowNowPlaying(next);
+            if (next) { setShowListening(false); setActivePane(null); }
+            setExpanded(false);
+          }}
+          activePane={activePane}
+          onToggleLyrics={() => togglePane('lyrics')}
+          onToggleQueue={() => togglePane('queue')}
+          onToggleDevice={() => togglePane('device')}
+          onToggleMini={handleMiniPlayer}
           onFullscreen={fullscreen}
         />
       </div>

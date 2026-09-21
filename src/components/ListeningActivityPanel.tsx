@@ -1,22 +1,31 @@
 import { CloseIcon } from './icons';
 
+import { ExpandArrowIcon } from './icons';
+
 interface Props {
   onClose: () => void;
   onOpenSettings: () => void;
+  expanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
-export default function ListeningActivityPanel({ onClose, onOpenSettings }: Props) {
+export default function ListeningActivityPanel({ onClose, onOpenSettings, expanded, onToggleExpand }: Props) {
   return (
-    <aside className="w-[350px] flex-shrink-0 flex flex-col bg-[#121212] rounded-lg overflow-y-auto min-h-0">
+    <aside className={`${expanded ? 'w-[420px]' : 'w-[350px]'} flex-shrink-0 flex flex-col bg-[#121212] rounded-lg overflow-y-auto min-h-0 transition-all duration-200`}>
       <div className="p-4 flex items-center justify-between">
         <h2 className="font-bold text-white text-[16px]">Listening activity</h2>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323] transition-colors"
-          title="Close"
-        >
-          <CloseIcon className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={onToggleExpand} className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323]" title={expanded ? 'Collapse' : 'Expand'}>
+            <ExpandArrowIcon className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          </button>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323] transition-colors"
+            title="Close"
+          >
+            <CloseIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
       <div className="px-4 pb-4 space-y-6">
         <p className="text-sm text-[#b3b3b3] leading-5">

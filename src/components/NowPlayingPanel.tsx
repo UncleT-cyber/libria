@@ -17,7 +17,15 @@ function videoEmbedUrl(src: string): string | null {
   return null;
 }
 
-export default function NowPlayingPanel() {
+import { CloseIcon, ExpandArrowIcon } from './icons';
+
+interface NowPlayingProps {
+  onClose?: () => void;
+  expanded?: boolean;
+  onToggleExpand?: () => void;
+}
+
+export default function NowPlayingPanel({ onClose, expanded, onToggleExpand }: NowPlayingProps = {} as NowPlayingProps) {
   const { state } = usePlayerStore();
   const { tracks } = useLibraryStore();
   const track: Track | undefined = tracks.find((t) => t.id === state.currentTrack);
@@ -32,11 +40,23 @@ export default function NowPlayingPanel() {
     : 0;
 
   return (
-    <aside className="w-80 flex-shrink-0 flex flex-col bg-[#121212] rounded-lg overflow-y-auto min-h-0">
+    <aside className={`${expanded ? 'w-[420px]' : 'w-[350px]'} flex-shrink-0 flex flex-col bg-[#121212] rounded-lg overflow-y-auto min-h-0 transition-all duration-200`}>
       <div className="p-4 flex items-center justify-between flex-shrink-0">
         <h2 className="font-bold text-white">
           {track ? (track.album || 'Now playing') : 'Now playing'}
         </h2>
+        <div className="flex items-center gap-1">
+          {onToggleExpand && (
+            <button onClick={onToggleExpand} className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323]" title={expanded ? 'Collapse' : 'Expand'}>
+              <ExpandArrowIcon className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+          {onClose && (
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323]">
+              <CloseIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {!track ? (
