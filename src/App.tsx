@@ -19,6 +19,8 @@ import SettingsModal from './components/SettingsModal';
 function App() {
   const { fetchLibrary, fetchFavorites } = useLibraryStore();
   const [currentView, setCurrentView] = useState<ViewName>('home');
+  const [history, setHistory] = useState<ViewName[]>(['home']);
+  const [historyIdx, setHistoryIdx] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState('');
   const [showAddMusic, setShowAddMusic] = useState(false);
@@ -69,6 +71,31 @@ function App() {
     }
   };
 
+  const navigate = (view: ViewName) => {
+    if (view === currentView) return;
+    const nextHist = history.slice(0, historyIdx + 1);
+    nextHist.push(view);
+    setHistory(nextHist);
+    setHistoryIdx(nextHist.length - 1);
+    setCurrentView(view);
+  };
+
+  const goBack = () => {
+    if (historyIdx > 0) {
+      const idx = historyIdx - 1;
+      setHistoryIdx(idx);
+      setCurrentView(history[idx]);
+    }
+  };
+
+  const goForward = () => {
+    if (historyIdx < history.length - 1) {
+      const idx = historyIdx + 1;
+      setHistoryIdx(idx);
+      setCurrentView(history[idx]);
+    }
+  };
+
   const renderView = () => {
     switch (currentView) {
       case 'search':
@@ -89,12 +116,16 @@ function App() {
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden gap-2 p-2">
       {/* grid: top-nav 64px | main 1fr | player 80-90px with Spotify gap */}
-      <div className="h-14 shrink-0">
+      <div className="h-16 shrink-0">
         <TopBar
           currentView={currentView}
           query={query}
           onQueryChange={setQuery}
-          onNavigate={setCurrentView}
+          onNavigate={navigate}
+          onGoBack={goBack}
+          onGoForward={goForward}
+          canGoBack={historyIdx > 0}
+          canGoForward={historyIdx < history.length - 1}
           onOpenSettings={() => setShowSettings(true)}
           onToggleListening={() => {
             const next = !showListening;
@@ -134,18 +165,17 @@ function App() {
       <div className="h-[90px] shrink-0 bg-black">
         <div className="h-full bg-black rounded-lg flex items-center">
           <PlayerBar
-            nowPlayingOpen={showNowPlaying || activePane !== null || showListening}
+            activePane={activePane}
+            onToggleLyrics={() => togglePane('lyrics')}
+            onToggleQueue={() => togglePane('queue')}
+            onToggleDevice={() => togglePane('device')}
+            onToggleMini={handleMiniPlayer}
             onToggleNowPlaying={() => {
               const next = !showNowPlaying;
               setShowNowPlaying(next);
               if (next) { setShowListening(false); setActivePane(null); }
               setExpanded(false);
             }}
-            activePane={activePane}
-            onToggleLyrics={() => togglePane('lyrics')}
-            onToggleQueue={() => togglePane('queue')}
-            onToggleDevice={() => togglePane('device')}
-            onToggleMini={handleMiniPlayer}
             onFullscreen={fullscreen}
           />
         </div>
