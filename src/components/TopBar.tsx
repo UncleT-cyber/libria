@@ -33,11 +33,12 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   // own window controls; interactive children opt back out with `no-drag`.
   const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
   const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
+  const isTauriWindow = typeof window !== 'undefined' && !!(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
 
   return (
     <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 h-16 bg-black select-none">
-      {/* Left: navigation chevrons - OS window controls are native (Tauri/browser chrome), not hardcoded dots */}
-      <div className="flex items-center gap-2" style={noDrag}>
+      {/* Left: navigation chevrons - Tauri Overlay traffic lights at 12,20 sit inside this 64px bar */}
+      <div className={`flex items-center gap-2 ${isTauriWindow ? 'pl-[76px]' : ''}`} style={noDrag}>
         <button
           disabled
           title="Go back"
