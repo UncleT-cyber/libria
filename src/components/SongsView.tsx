@@ -66,12 +66,17 @@ export function TrackTable({ rows, onAddMusic }: { rows: Track[]; onAddMusic?: (
           const track = rows[row.index];
           const isCurrent = state.currentTrack === track.id;
           const playing = isCurrent && state.isPlaying;
+          const canPlay = !!track.file_path;
           return (
             <div
               key={track.id}
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: row.size, transform: `translateY(${row.start}px)` }}
-              onClick={() => (playing ? pausePlayback() : playTrack(track.id))}
-              className="group grid grid-cols-[16px_1fr_200px_minmax(120px,1fr)_40px] gap-4 items-center px-4 rounded-md hover:bg-[#2a2a2a] cursor-pointer"
+              onClick={() => {
+                if (!canPlay) return;
+                if (playing) pausePlayback();
+                else playTrack(track.id);
+              }}
+              className={`group grid grid-cols-[16px_1fr_200px_minmax(120px,1fr)_40px] gap-4 items-center px-4 rounded-md ${canPlay ? 'hover:bg-[#2a2a2a] cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
             >
               {/* # / playing indicator */}
               <div className="text-sm text-[#b3b3b3] flex justify-end">

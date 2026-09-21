@@ -39,12 +39,12 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
   const [muted, setMuted] = useState(false);
 
   const activeTrack = tracks.find((t) => t.id === state.currentTrack);
-  const currentIndex = tracks.findIndex((t) => t.id === state.currentTrack);
-
+  const playable = tracks.filter((t) => !!t.file_path);
   const playNeighbor = (dir: 1 | -1) => {
-    if (tracks.length === 0) return;
-    const nextIdx = currentIndex === -1 ? 0 : (currentIndex + dir + tracks.length) % tracks.length;
-    playTrack(tracks[nextIdx].id);
+    if (playable.length === 0) return;
+    const curPlayIdx = playable.findIndex((t) => t.id === state.currentTrack);
+    const nextIdx = curPlayIdx === -1 ? 0 : (curPlayIdx + dir + playable.length) % playable.length;
+    playTrack(playable[nextIdx].id);
   };
 
   const togglePlay = () => {
