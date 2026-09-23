@@ -1,176 +1,167 @@
-# Libria — Your Music. Your Library. Your Way.
+# Libria
 
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Tauri 2](https://img.shields.io/badge/Tauri-2.x-24c8db?logo=tauri)
-![React 19](https://img.shields.io/badge/React-19-58c4dc?logo=react)
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python)
-![Platform: macOS](https://img.shields.io/badge/platform-macOS-black)
+**Your Music. Your Library. Your Way.**
 
-Spotify-inspired desktop music player with a local-first library, high-quality archiving, and a native macOS shell. Libria ships as a **Tauri (Rust) + React** desktop app and a **Python (customtkinter + SQLite + yt-dlp + mutagen)** implementation sharing the same product spec.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Tauri 2](https://img.shields.io/badge/Tauri-2.x-24c8db?logo=tauri)](https://tauri.app)
+[![React 19](https://img.shields.io/badge/React-19-58c4dc?logo=react)](https://react.dev)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python)](https://www.python.org)
+[![Platform: macOS](https://img.shields.io/badge/platform-macOS-black)](https://www.apple.com/macos)
 
-> **Screenshot:** Top bar with traffic-light-aligned navigation (←/→), centered search + Home, and a bottom player whose center playback stays centered while `Lyrics` → `Fullscreen` is pinned flush to the far-right (<0.7 cm from the window edge) — Spotify parity.
+A Spotify-inspired desktop music player with a local-first library and native macOS design.
 
----
-
-## ✨ Features
-
-- **Library** — Tracks, albums, artists, playlists with virtualized lists (`@tanstack/react-virtual`)
-- **Import** — Scan a folder, import files, or paste any `open.spotify.com` / `spotify:` URL (track / album / playlist / show). Albums create a collection + placeholder row and queue via `ytsearch1:` → yt-dlp
-- **Play-while-downloading** — Persistent daemon thread drains a `queue.Queue`; audio routes instantly (local file if archived, streaming URL otherwise), archival + ID3 tagging happens in background
-- **Tagging** — `mutagen` ID3: `TIT2/TPE1/TALB/TYER` `encoding=3`, `APIC type=3` front cover, `USLT lang='eng'` (TYER → TDRC on v2.4)
-- **Audio** — VLC → pygame → Null backend chain, `resolve_source` prefers `local_file_path`, `get_progress()` → `{elapsed_ms, total_ms, percent}`
-- **Top bar** — Traffic-light `Overlay` at `(12,26)`, `←/→` tip-center aligned to traffic-light center, `h-[68px]` with ~8% larger Home/Search/Bell/Profile, hover + disabled states
-- **Player bar** — `grid [1fr_auto_1fr]` keeps play controls viewport-centered; right group (`Lyrics`/`Queue`/`Device`/`Volume`/`Mini`/`Fullscreen`) is `justify-self-end` flush to the far-right
-- **Mini player & Fullscreen** — Real state: Picture-in-Picture fallback + in-app mini overlay (`Restore`), browser Fullscreen API with Tauri `window.setFullscreen` fallback, synced `isMini`/`isFullscreen` active states
-- **Modern UI** — Tailwind CSS 4, lucide-react icons, Zustand stores, dark theme, macOS rounded-square icon (black + neon-green `♫`)
+Libria lets you collect music from multiple sources, keep a searchable local library, and play with a familiar Spotify-like experience — including traffic-light-aligned navigation, a centered player, and controls pinned to the far-right edge.
 
 ---
 
-## 🗂 Repository Layout
+## Features
+
+- **Unified Library** — Browse tracks, albums, artists and playlists. Virtualized lists stay fast at any size.
+- **Import Anything** — Scan a local folder, import audio files, or paste a Spotify link (`track`, `album`, `playlist`, `show`). Albums and playlists create collections automatically.
+- **Play While Downloading** — Playback starts immediately. If the file is not yet archived, Libria streams and downloads in the background.
+- **High-Quality Archiving** — Best-audio via `yt-dlp` with `ffmpeg` extraction to 320 kbps MP3 and proper ID3 tags.
+- **Correct Tagging** — Title, artist, album, year, cover art and lyrics written with `mutagen`.
+- **Lyrics** — LRCLIB lookup displayed in the Lyrics panel and embedded as USLT when available.
+- **Native macOS Shell** — Overlay title bar with traffic lights at `12,26`, custom rounded-square icon (black + neon green ♫), dark theme.
+- **Player** — Shuffle, previous/next, play/pause, repeat, seek bar, volume, queue, device, mini-player and fullscreen.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS 4, Zustand, TanStack Virtual, Lucide Icons |
+| Desktop Shell | Tauri 2 (Rust) |
+| Python App | customtkinter, SQLite, `queue.Queue` download engine, `yt-dlp`, `mutagen`, `python-vlc` / `pygame` |
+| Backend | Python `libria/server.py` HTTP API (`/api`) on port `12001` |
+
+---
+
+## Project Structure
 
 ```
-.
-├── src/                 # Vite + React frontend
-│   ├── components/      # TopBar, PlayerBar, Sidebar, LyricsPanel, QueuePanel, …
-│   ├── stores/          # Zustand: library.ts, player.ts
-│   ├── api/backend.ts   # HTTP → Python API (even inside Tauri webview) + isTauriWindow
-│   ├── App.tsx          # History (back/forward), fullscreen, mini, panes
-│   └── index.css        # Tailwind theme + spotify-range + eq animation
-├── src-tauri/           # Tauri 2 shell (Rust)
-│   ├── src/{audio,commands,database,download,filesystem,sources,utils}
-│   ├── icons/           # icon.png / icon.icns (black neon ♫)
-│   └── tauri.conf.json  # titleBarStyle Overlay, trafficLightPosition {12,26}
-├── libria/              # Python implementation (active spec)
-│   ├── db.py            # SQLite: PRAGMA foreign_keys=ON, tracks/favorites/collections/app_settings, thread-safe
-│   ├── downloader.py    # PlaybackDownloadManager — queue.Queue + daemon, yt_dlp_archiver
-│   ├── audio_controller.py, tagging.py, settings.py, spotify.py, lyrics.py, sync.py, server.py
-│   └── ui/{router.py,pages.py,app.py}
-├── main.py              # customtkinter entry → build_app()
-├── tests/               # pytest — headless, no display required
-└── dist/                # Vite build output (frontendDist for Tauri)
+src/                 # React frontend (TopBar, PlayerBar, Sidebar, panels)
+src-tauri/           # Tauri shell, window config, icons, Rust commands
+libria/              # Python core: db, downloader, audio, tagging, spotify, lyrics, sync, server
+main.py              # Python desktop entry (customtkinter)
+tests/               # pytest suite (headless)
+dist/                # Vite production build (used by Tauri)
 ```
 
-> **Two stacks:** `src/` + `src-tauri/` is the shipped desktop binary (`Libria.app`). `libria/` + `main.py` + `tests/` is the Python spec implementation (customtkinter GUI, SQLite ledger). Both share the same `libria/server.py` HTTP bridge.
+Two implementations share the same product spec:
+
+- `src` + `src-tauri` → shipped `Libria.app`
+- `libria` + `main.py` + `tests` → Python reference implementation
+
+Both talk to the same HTTP bridge: `libria/server.py`.
 
 ---
 
-## 🚀 Quick Start
+## Getting Started
 
 ### Prerequisites
 
-- **Node 20+**, **npm 10+**, **Rust 1.77+**, **Python 3.10+**
-- **macOS** recommended (traffic-light `Overlay`), Linux/Windows via Tauri targets
-- Optional: `ffmpeg` (for yt-dlp `FFmpegExtractAudio` → 320 kbps MP3), `vlc`/`pygame`
+- Node 20+, Rust 1.77+, Python 3.10+
+- macOS recommended (for traffic-light Overlay). Linux/Windows also build via Tauri.
+- Optional: `ffmpeg` for high-quality MP3 extraction, `vlc` for local playback.
 
-### 1. Python API (port 12001)
+### 1. Start the Python API
 
 ```bash
-pip install -r requirements.txt        # customtkinter, mutagen, yt-dlp, fastapi, uvicorn, python-vlc
-python -m libria.server 12001         # → http://localhost:12001  (supabase off → SQLite at ~/.libria/libria.db)
-# or with Supabase:  SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… python -m libria.server
+pip install -r requirements.txt
+python -m libria.server 12001
+# → http://localhost:12001
+# Uses SQLite at ~/.libria/libria.db by default.
+# With Supabase: set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
 ```
 
-Endpoints: `GET /api/health`, `GET /api/get_library`, `POST /api/import_spotify`, `POST /api/play_track` (queues ytsearch download, waits ≤15 s), `GET /api/audio/:id` (Range), `POST /api/fetch_lyrics` (LRCLIB), `POST /api/create_playlist`, etc.
-
-CORS `*`, `Accept-Ranges: bytes`.
-
-### 2. Frontend (Vite)
+### 2. Start the Frontend
 
 ```bash
 npm install
-npm run dev          # → http://localhost:5174  (proxies /api → :12001)
+npm run dev
+# → http://localhost:5174  (proxies /api to :12001)
 ```
 
-The Tauri webview loads `http://localhost:5174` in dev (`beforeDevCommand`).
-
-### 3. Desktop App (Tauri)
+### 3. Run the Desktop App
 
 ```bash
-npm run build        # tsc + vite → dist/
-# dev shell (Vite + Tauri):
+# Development
 npx tauri dev
-# release bundle:
-cargo build --release --manifest-path src-tauri/Cargo.toml
-# → src-tauri/target/release/bundle/macos/Libria.app
-open src-tauri/target/release/bundle/macos/Libria.app
-# quarantine clear after copy:
-xattr -cr src-tauri/target/release/bundle/macos/Libria.app
-```
 
-### 4. Python Desktop (customtkinter)
-
-```bash
-python main.py       # requires display; not for CI
-```
-
----
-
-## 🎧 How to Use
-
-1. **Add music** — In *Your Library* click `+` → `Add music` → *Scan folder* / *Import files* / *Paste Spotify URL*. Example: `https://open.spotify.com/album/7AwrgenNcTAJlJF3pKL0Qr`
-2. **Album flow** — Album URL creates a collection (`album:ID`) and enqueues the title via `ytsearch1:"{title} {artist}"` → `~/Music/libria/<Album>/…mp3` with ID3 + optional lyrics (LRCLIB `plainLyrics`/`syncedLyrics` → DB `lyrics` + `USLT`)
-3. **Play** — Click a track or press `Play`. First stream triggers `POST /api/play_track` (auto-download), `HEAD /api/audio/:id` guard, then `HTMLAudioElement` at `GET /api/audio/:id` (Range). Subsequent plays are zero-buffer from local file.
-4. **Top navigation** — `←/→` use App history (`history`/`historyIdx` in `App.tsx`), not `window.history`; disabled when no back/forward, hover enlarges hit-area 36 px.
-5. **Bottom player** — Left: artwork/title/artist. Center: shuffle/prev/play/next/repeat + seek (4 px track, 12 px thumb on hover). Right: `Lyrics` / `Queue` (green dot) / `Device` / `Volume` / `Mini` / `Fullscreen` — grid keeps center centered, right is `justify-self-end pr-0` within `gap-4` + outer `px-0` (≈0.2 cm from window edge).
-6. **Mini** — Toggles in-app overlay (`Libria Mini Player` + `Restore`) and best-effort `documentPictureInPicture`; audio element is singleton, no duplicate engine, track state preserved.
-7. **Fullscreen** — `document.documentElement.requestFullscreen()` with `fullscreenchange` sync; Tauri fallback `window.__TAURI__.window.getCurrentWindow().setFullscreen`; active green dot.
-8. **Queue / Lyrics / Device** — Right-side toggles for `QueuePanel`, `LyricsPanel` (reads `track.lyrics`), `DevicePanel`.
-
----
-
-## 🧪 Testing & Verification
-
-```bash
-# Python unit tests (headless)
-python3 -m pytest tests/ -q        # 54 passed (spotify, db, downloader, router, server, tagging …)
-
-# Frontend build
+# Production bundle
 npm run build
-npm run lint   # oxlint
-
-# Manual checklist (do not skip before release)
-# [ ] Back/forward visible, tip-center aligned y~32, functional, disabled states
-# [ ] Top h-[68px] Home 52px Search 52px 17px — ~8% larger, no wrap
-# [ ] Bottom center stays centered, right group flush far-right (<0.7 cm)
-# [ ] Mini toggles + Restore, no audio duplicate
-# [ ] Fullscreen enters/exits, state syncs, no console errors
-# [ ] Play/Pause/Next/Prev/Shuffle/Repeat/Seek/Volume intact
+cargo build --release --manifest-path src-tauri/Cargo.toml
+open src-tauri/target/release/bundle/macos/Libria.app
+xattr -cr src-tauri/target/release/bundle/macos/Libria.app  # clear quarantine after copy
 ```
 
----
-
-## 🔧 Configuration
-
-| Key | Where | Notes |
-|-----|-------|-------|
-| `trafficLightPosition` | `src-tauri/tauri.conf.json` | `{x:12,y:26}`, `titleBarStyle Overlay`, `hiddenTitle true` |
-| `VITE_API_URL` | `src/api/backend.ts` | Browser: `/api` (Vite proxy) · Tauri: `http://localhost:12001/api` · Prod: `https://libria-api.onrender.com/api` |
-| `LIBRIA_DB_PATH` / `~/.libria/libria.db` | `libria/server.py` | Falls back to Supabase when `SUPABASE_URL` set |
-| `download_directory` | `libria/db.py` SEED → `./downloads` / `~/Music/libria` | Album-aware `yt_dlp_archiver` creates `<dest>/<Album>/` |
-
----
-
-## 📦 Build & Release
+### 4. Python Desktop (alternative)
 
 ```bash
-npm run build && cargo build --release --manifest-path src-tauri/Cargo.toml
-# icons: src-tauri/icons/icon.png (1024) → icon.icns (iconutil) + icon.ico (Pillow)
-# bundle: src-tauri/target/release/bundle/macos/Libria.app
+python main.py   # requires a display
 ```
 
-CI: keep `customtkinter` imports only in `libria/ui/pages.py`, `libria/ui/app.py`, `main.py` (no display in CI).
+---
+
+## Usage
+
+1. **Add music** — Open *Your Library* and click `+` → `Add music`. Choose *Scan folder*, *Import files*, or paste a Spotify URL.
+2. **Albums and playlists** — Pasting an album or playlist link creates a collection. Each track is queued for download.
+3. **Play** — Click any track. The first play triggers a background download to `~/Music/libria/<Album>/` if needed. Later plays are instant from the local file.
+4. **Navigate** — Use `←` / `→` next to the traffic lights to go back and forward through views.
+5. **Player** — Center controls stay centered. Lyrics, Queue, Device, Volume, Mini-player and Fullscreen are grouped at the far right end of the bottom bar.
+6. **Mini / Fullscreen** — Mini shows a compact overlay with *Restore*. Fullscreen uses the browser Fullscreen API with a Tauri fallback.
 
 ---
 
-## 🤝 Contributing
+## Testing
 
-1. Fork, branch, inspect `src/components/{TopBar,PlayerBar}` and `src/App.tsx` before touching navigation/player.
-2. Use existing stores (`zustand`), `invokeBackend` abstraction, Tailwind tokens.
-3. Smallest clean diff, no `window.history.back()` unless appropriate, no duplicate audio elements.
-4. `python3 -m pytest tests/ -q` and `npm run build` must pass.
+```bash
+python3 -m pytest tests/ -q   # Python unit tests (54 tests)
+npm run build                 # Frontend production build must pass
+npm run lint                  # oxlint
+```
 
 ---
 
-## 📄 License
+## Legal and Copyright
 
-MIT © Anthony Abah — see `src-tauri/Cargo.toml` (`repository: https://github.com/UncleT-cyber/libria`).
+Libria is designed to respect copyright and platform terms:
+
+- **No DRM circumvention.** Libria does not crack, bypass, or strip Spotify DRM. Spotify URLs are treated as *metadata references* only (title, artist, album fetched via public oEmbed). No Spotify audio is accessed directly.
+- **User-provided sources.** The app only processes files you already own or links you paste. For Spotify links, audio is resolved by searching the public web (YouTube) via `yt-dlp` with a `ytsearch1:` query built from the title and artist. This is the same as a user manually searching YouTube.
+- **Local, personal archiving.** Downloaded files are stored locally under your music directory for personal, offline playback. Libria does not host, redistribute, or share files with other users.
+- **No streaming service impersonation.** Playback for local files uses your machine's audio backend (VLC / pygame) or the browser `HTMLAudioElement` over `/api/audio/:id` with standard HTTP range requests. No service is being re-streamed.
+- **Attribution and licensing.** Tagging preserves original metadata (title, artist, album, year, cover). Lyrics are fetched from public lyric services (e.g., LRCLIB) and embedded as `USLT` only when available.
+- **User responsibility.** You are responsible for ensuring you have the right to import and keep any content you add. Use Libria for content you own, have licensed, or that is in the public domain, in accordance with local law.
+
+If you are a rights holder and believe content is being misused, please contact the project maintainers.
+
+> **Disclaimer:** This project is for educational and personal-library purposes. It is not affiliated with or endorsed by Spotify AB.
+
+---
+
+## Configuration
+
+- **Window** — `src-tauri/tauri.conf.json` (`titleBarStyle: Overlay`, `hiddenTitle: true`, `trafficLightPosition: {x:12, y:26}`)
+- **API** — `src/api/backend.ts` uses `VITE_API_URL` (`/api` in browser, `http://localhost:12001/api` in Tauri, or `https://libria-api.onrender.com/api` in production)
+- **Database** — `libria/db.py` seeds `~/.libria/libria.db` or Supabase when configured
+- **Downloads** — `~/Music/libria/<Album>/` (album-aware)
+
+---
+
+## Contributing
+
+1. Fork and create a feature branch.
+2. Inspect `src/components/TopBar.tsx`, `src/components/PlayerBar.tsx` and `src/App.tsx` before changing navigation or playback.
+3. Keep changes small and use the existing `zustand` stores and `invokeBackend` abstraction.
+4. Run `python3 -m pytest tests/ -q` and `npm run build` before opening a pull request.
+
+---
+
+## License
+
+MIT © Anthony Abah — see `src-tauri/Cargo.toml` for repository details.
+
