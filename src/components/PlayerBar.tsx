@@ -141,24 +141,24 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
             {shuffle && <span className="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#1ED760]" />}
           </button>
           <button onClick={() => playNeighbor(-1)} title="Previous" className="flex h-8 w-8 items-center justify-center text-white hover:scale-105">
-            <PrevIcon className="h-[18px] w-[18px]" />
+            <PrevIcon className="h-4 w-4" />
           </button>
           <button
             onClick={togglePlay}
             title={state.isPlaying ? 'Pause' : 'Play'}
-            className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-white text-black hover:scale-105"
+            className="mx-1 flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:scale-105"
           >
-            {state.isPlaying ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="ml-0.5 h-3.5 w-3.5" />}
+            {state.isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="ml-0.5 h-4 w-4" />}
           </button>
           <button onClick={() => playNeighbor(1)} title="Next" className="flex h-8 w-8 items-center justify-center text-white hover:scale-105">
-            <NextIcon className="h-[18px] w-[18px]" />
+            <NextIcon className="h-4 w-4" />
           </button>
           <button
             onClick={cycleRepeat}
             title={repeatMode === 'one' ? 'Repeat one' : repeatMode === 'all' ? 'Enable repeat' : 'Enable repeat one'}
             className={`relative flex h-8 w-8 items-center justify-center ${repeatMode !== 'off' ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}
           >
-            <RepeatIcon className="h-4 w-4" />
+            <RepeatIcon className="h-[18px] w-[18px]" />
             {repeatMode !== 'off' && (
               <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 ${repeatMode === 'one' ? 'text-[8px] font-bold leading-none text-[#1ED760]' : 'h-1 w-1 rounded-full bg-[#1ED760]'}`}>
                 {repeatMode === 'one' ? '1' : ''}

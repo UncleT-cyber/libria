@@ -49,16 +49,24 @@ export const PlusIcon = (p: P) => (
 );
 
 export const PlayIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M4.8 2.6v10.8L13.4 8 4.8 2.6z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M6.1 3.15v9.7L13.2 8 6.1 3.15z" /></svg>
 );
 export const PauseIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M3.2 2.4h3.1v11.2H3.2zM9.7 2.4h3.1v11.2H9.7z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M4.15 3.1h2.35v9.8H4.15zm5.35 0h2.35v9.8H9.5z" /></svg>
 );
 export const NextIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M12.6 2.2h1.5v11.6h-1.5zM2.2 2.6l8.6 5.4-8.6 5.4V2.6z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 3.3 10 8l-7.6 4.7V3.3zM11.5 3.2h1.7v9.6h-1.7z" /></svg>
 );
 export const PrevIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M1.9 2.2h1.5v11.6H1.9zM13.8 2.6 5.2 8l8.6 5.4V2.6z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M13.6 3.3 6 8l7.6 4.7V3.3zM2.8 3.2h1.7v9.6H2.8z" /></svg>
+);
+export const RepeatIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2.4 5.4h8.1A2.1 2.1 0 0 1 12.6 7.5v1.1" />
+    <path d="M10.4 3.3 12.6 5.4 10.4 7.5" />
+    <path d="M13.6 10.6H5.5A2.1 2.1 0 0 1 3.4 8.5V7.4" />
+    <path d="M5.6 12.7 3.4 10.6 5.6 8.5" />
+  </svg>
 );
 export const ShuffleIcon = (p: P) => (
   <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round">
@@ -67,11 +75,6 @@ export const ShuffleIcon = (p: P) => (
     <path d="M2 11.5h2.4c.7 0 1.3-.3 1.7-.9" />
     <path d="M8.4 5.6c.4-.6 1-.9 1.7-.9H14" />
     <path d="M12.1 6.8 14 5.1 12.1 3.4" />
-  </svg>
-);
-export const RepeatIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
-    <path d="M11.15 1.35 13.7 3.7 11.15 6.05V4.35H4.55A2.35 2.35 0 0 0 2.2 6.7v1.15H1V6.7A3.55 3.55 0 0 1 4.55 3.15h6.6V1.35zM4.85 14.65 2.3 12.3l2.55-2.35v1.7h6.6a2.35 2.35 0 0 0 2.35-2.35V8.15H15v1.15a3.55 3.55 0 0 1-3.55 3.55H4.85v1.8z" />
   </svg>
 );
 
