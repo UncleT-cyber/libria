@@ -36,8 +36,9 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
 
   return (
-    <div style={drag} className="sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 bg-black pr-3 select-none">
-        <div className="flex h-full items-center gap-1" style={{ ...noDrag, paddingLeft: 76 }}>
+    <div style={drag} className="relative sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 bg-black pr-3 select-none">
+        <div className="h-full">
+          <div className="absolute flex items-center gap-0.5" style={{ ...noDrag, left: 70, top: 2 }}>
           <button
             onClick={onGoBack}
             disabled={!canGoBack}
@@ -56,6 +57,7 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
           >
             <ChevronRightIcon className="h-4 w-4 shrink-0" />
           </button>
+          </div>
         </div>
 
       <div className="flex min-w-0 items-center justify-center gap-2" style={noDrag}>
