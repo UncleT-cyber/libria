@@ -7,6 +7,8 @@ import SongsView from './components/SongsView';
 import AlbumsView from './components/AlbumsView';
 import ArtistsView from './components/ArtistsView';
 import PlaylistsView from './components/PlaylistsView';
+import DownloadsView from './components/DownloadsView';
+import MiniPlayer from './components/MiniPlayer';
 import PlayerBar from './components/PlayerBar';
 import NowPlayingPanel from './components/NowPlayingPanel';
 import ListeningActivityPanel from './components/ListeningActivityPanel';
@@ -17,7 +19,7 @@ import AddMusicModal from './components/AddMusicModal';
 import SettingsModal from './components/SettingsModal';
 
 function App() {
-  const { fetchLibrary, fetchFavorites } = useLibraryStore();
+  const { fetchLibrary, fetchFavorites, isLoading } = useLibraryStore();
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [history, setHistory] = useState<ViewName[]>(['home']);
   const [historyIdx, setHistoryIdx] = useState(0);
@@ -36,6 +38,10 @@ function App() {
     fetchLibrary();
     fetchFavorites();
   }, [fetchLibrary, fetchFavorites]);
+
+  useEffect(() => {
+    if (window.matchMedia('(min-width: 1100px)').matches) setActivePane('queue');
+  }, []);
 
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -72,23 +78,7 @@ function App() {
     setShowNowPlaying(false);
   };
 
-  const handleMiniPlayer = async () => {
-    // Toggle in-app mini player; also try native PiP as enhancement, but never block UI
-    setIsMini((v) => !v);
-    try {
-      const w = window as unknown as { documentPictureInPicture?: { requestWindow: (opts: { width: number; height: number }) => Promise<Window> } };
-      if (!isMini && w.documentPictureInPicture?.requestWindow) {
-        // Best-effort PiP — if user has already toggled to mini, also open PiP window for true floating
-        // Don't await failure; in-app mini already handles visibility
-        w.documentPictureInPicture.requestWindow({ width: 360, height: 120 }).then((pipWin) => {
-          pipWin.document.body.style.margin = '0';
-          pipWin.document.body.innerHTML = `<div style="background:#121212;color:white;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">Libria Mini Player — close PiP to return</div>`;
-        }).catch(() => {});
-      }
-    } catch {
-      // ignore PiP failure — in-app mini already active
-    }
-  };
+  const handleMiniPlayer = () => setIsMini((open) => !open);
 
   const navigate = (view: ViewName) => {
     if (view === currentView) return;
@@ -127,15 +117,16 @@ function App() {
         return <ArtistsView />;
       case 'playlists':
         return <PlaylistsView />;
+      case 'downloads':
+        return <DownloadsView onAddMusic={() => setShowAddMusic(true)} />;
       default:
         return <HomeView />;
     }
   };
 
   return (
-    <div className="h-screen bg-black flex flex-col overflow-hidden gap-2 p-2">
-      {/* top 68px, main 1fr, player 90px */}
-      <div className="h-[68px] shrink-0">
+    <div className="flex h-screen flex-col overflow-hidden bg-black">
+      <div className="h-16 shrink-0">
         <TopBar
           currentView={currentView}
           query={query}
@@ -157,15 +148,21 @@ function App() {
       </div>
 
       {/* Workspace: sidebar | main | right-pane - 8px gap from player */}
-      <div className="flex-1 flex gap-2 min-h-0">
+      <div className="flex min-h-0 flex-1 flex-col gap-1 px-2 pb-2">
+      <div className="flex min-h-0 flex-1 gap-2">
         <Sidebar
           currentView={currentView}
           collapsed={collapsed}
-          onViewChange={setCurrentView}
+          onViewChange={navigate}
           onToggleCollapse={() => setCollapsed((v) => !v)}
           onAddMusic={() => setShowAddMusic(true)}
         />
-        <main className="flex-1 bg-[#121212] rounded-lg overflow-y-auto flex flex-col min-w-0">
+        <main className="flex-1 bg-[#121212] rounded-lg overflow-y-auto flex flex-col min-w-0 relative">
+          {isLoading && (
+            <div className="sticky top-0 z-20 h-1 bg-[#282828]">
+              <div className="h-full w-1/3 bg-[#1DB954] animate-pulse" />
+            </div>
+          )}
           {renderView()}
         </main>
         {showListening ? (
@@ -177,13 +174,12 @@ function App() {
         ) : activePane === 'device' ? (
           <DevicePanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setActivePane(null)} />
         ) : showNowPlaying ? (
-          <NowPlayingPanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setShowNowPlaying(false)} />
+          <NowPlayingPanel expanded={expanded} onToggleExpand={() => setExpanded((v) => !v)} onClose={() => setShowNowPlaying(false)} onLyrics={() => togglePane('lyrics')} />
         ) : null}
       </div>
 
-      <div className="h-[90px] shrink-0 bg-black">
-        <div className="h-full bg-black rounded-lg flex items-center">
-          <PlayerBar
+      <div className="h-[72px] shrink-0 bg-black">
+        <PlayerBar
             activePane={activePane}
             isMiniActive={isMini}
             isFullscreenActive={isFullscreen}
@@ -199,22 +195,16 @@ function App() {
             }}
             onFullscreen={fullscreen}
           />
-        </div>
+      </div>
       </div>
 
-      {isMini && (
-        <div className="fixed bottom-[98px] right-3 z-50 w-[360px] bg-[#181818] border border-[#282828] rounded-lg shadow-2xl flex items-center gap-3 p-3">
-          <div className="w-12 h-12 bg-[#282828] rounded flex items-center justify-center shrink-0">♫</div>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm text-white truncate">Libria Mini Player</div>
-            <div className="text-xs text-[#b3b3b3] truncate">Playback continues — click restore to return</div>
-          </div>
-          <button onClick={() => setIsMini(false)} className="px-3 py-1.5 bg-white text-black rounded-full text-sm font-bold hover:bg-[#f0f0f0]">Restore</button>
-          <button onClick={() => setIsMini(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-[#282828] text-white hover:bg-[#2a2a2a]">×</button>
-        </div>
-      )}
+      {isMini && <MiniPlayer onClose={() => setIsMini(false)} />}
 
-      <AddMusicModal isOpen={showAddMusic} onClose={() => setShowAddMusic(false)} />
+      <AddMusicModal
+        isOpen={showAddMusic}
+        onClose={() => setShowAddMusic(false)}
+        onImported={() => navigate('downloads')}
+      />
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );

@@ -34,50 +34,47 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
 
   const drag = { WebkitAppRegion: 'drag' } as React.CSSProperties;
   const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
-  const isTauriWindow = typeof window !== 'undefined' && !!(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
 
   return (
-    <div style={drag} className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 h-[68px] bg-black select-none">
-        {/* Left: traffic lights at (12,26) + chevrons - tips centered on traffic light middle (~y 32), gap 76px avoids overlap, slightly larger */}
-        <div className={`flex items-center gap-2.5 ${isTauriWindow ? 'pl-[76px]' : ''}`} style={{...noDrag, position: 'relative', top: isTauriWindow ? '-8px' : '0px'}}>
+    <div style={drag} className="sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 bg-black pr-3 select-none">
+        <div className="flex h-full items-center gap-1" style={{ ...noDrag, paddingLeft: 76 }}>
           <button
             onClick={onGoBack}
             disabled={!canGoBack}
             title={canGoBack ? 'Go back' : 'No back history'}
-            className={`w-9 h-9 flex items-center justify-center rounded-full bg-black text-white shrink-0 ${canGoBack ? 'hover:bg-[#1a1a1a] cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-white ${canGoBack ? 'cursor-pointer hover:bg-[#1a1a1a]' : 'cursor-not-allowed opacity-40'}`}
             style={noDrag}
           >
-            <ChevronLeftIcon className="w-[22px] h-[22px] shrink-0" />
+            <ChevronLeftIcon className="h-4 w-4 shrink-0" />
           </button>
           <button
             onClick={onGoForward}
             disabled={!canGoForward}
             title={canGoForward ? 'Go forward' : 'No forward history'}
-            className={`w-9 h-9 flex items-center justify-center rounded-full bg-black text-white shrink-0 ${canGoForward ? 'hover:bg-[#1a1a1a] cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-white ${canGoForward ? 'cursor-pointer hover:bg-[#1a1a1a]' : 'cursor-not-allowed opacity-40'}`}
             style={noDrag}
           >
-            <ChevronRightIcon className="w-[22px] h-[22px] shrink-0" />
+            <ChevronRightIcon className="h-4 w-4 shrink-0" />
           </button>
         </div>
 
-      {/* Center: home pill + search pill - ~8% larger */}
-      <div className="flex items-center justify-center gap-2.5 min-w-0" style={noDrag}>
+      <div className="flex min-w-0 items-center justify-center gap-2" style={noDrag}>
         <button
           onClick={() => onNavigate('home')}
           title="Home"
-          className={`w-[52px] h-[52px] flex items-center justify-center rounded-full shrink-0 transition-colors ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
             currentView === 'home' ? 'bg-white text-black' : 'bg-[#242424] text-white hover:bg-[#2a2a2a]'
           }`}
         >
-          {currentView === 'home' ? <HomeIcon className="w-[26px] h-[26px]" /> : <HomeOutlineIcon className="w-[26px] h-[26px]" />}
+          {currentView === 'home' ? <HomeIcon className="h-[18px] w-[18px]" /> : <HomeOutlineIcon className="h-[18px] w-[18px]" />}
         </button>
-        <div className="relative w-[500px] max-w-[min(500px,40vw)] h-[52px] flex items-center bg-[#242424] hover:bg-[#2a2a2a] focus-within:bg-[#2a2a2a] rounded-full border border-transparent focus-within:border-white transition-colors group">
+        <div className="group relative flex h-10 w-[420px] max-w-[min(420px,38vw)] items-center rounded-full border border-transparent bg-[#242424] transition-colors hover:bg-[#2a2a2a] focus-within:border-white focus-within:bg-[#2a2a2a]">
           <button
             onClick={() => onNavigate('search')}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white"
             title="Search"
           >
-            <SearchIcon className="w-[22px] h-[22px]" />
+            <SearchIcon className="h-[18px] w-[18px]" />
           </button>
           <input
             type="text"
@@ -85,41 +82,40 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
             onFocus={() => onNavigate('search')}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="What do you want to play?"
-            className="w-full bg-transparent text-white pl-[46px] pr-[90px] h-full rounded-full text-[17px] font-medium outline-none placeholder-[#b3b3b3] placeholder:font-normal"
+            className="h-full w-full rounded-full bg-transparent pl-10 pr-16 text-[15px] font-medium text-white outline-none placeholder:font-normal placeholder:text-[#b3b3b3]"
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
             {query ? (
               <button
                 onClick={() => onQueryChange('')}
                 title="Clear search"
-                className="text-[#b3b3b3] hover:text-white transition-colors p-1"
+                className="p-1 text-[#b3b3b3] transition-colors hover:text-white"
               >
-                <CloseIcon className="w-[22px] h-[22px]" />
+                <CloseIcon className="h-4 w-4" />
               </button>
             ) : (
-              <div className="w-px h-6 bg-[#3e3e3e] mx-1" />
+              <div className="mx-1 h-4 w-px bg-[#3e3e3e]" />
             )}
             <button
               onClick={() => onNavigate('search')}
               title="Browse"
-              className="w-9 h-9 flex items-center justify-center text-[#b3b3b3] hover:text-white transition-colors"
+              className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] transition-colors hover:text-white"
             >
-              <BrowseIcon className="w-[22px] h-[22px]" />
+              <BrowseIcon className="h-[18px] w-[18px]" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Right: bell + listening activity + profile - ~8% larger */}
-      <div className="flex items-center justify-end gap-2.5 relative" style={noDrag}>
+      <div className="relative flex items-center justify-end gap-2" style={noDrag}>
         <div className="relative">
           <button
             onClick={() => setNotifOpen((v) => !v)}
             title="Notifications"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] transition-colors relative"
+            className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#1f1f1f] text-white transition-colors hover:bg-[#2a2a2a]"
           >
-            <BellIcon className="w-[22px] h-[22px]" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#3d91f4] rounded-full border border-black" />
+            <BellIcon className="h-[18px] w-[18px]" />
+            <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full border border-black bg-[#3d91f4]" />
           </button>
           {notifOpen && (
             <>
@@ -137,15 +133,15 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
         <button
           onClick={onToggleListening}
           title="Listening activity"
-          className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors relative ${listeningOpen ? 'bg-white text-black' : 'bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${listeningOpen ? 'bg-white text-black' : 'bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]'}`}
         >
-          <FriendsIcon className="w-[22px] h-[22px]" />
+          <FriendsIcon className="h-[18px] w-[18px]" />
         </button>
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
             title="Profile - Anthony Abah"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#19e68c] text-black text-sm font-bold ring-2 ring-black hover:scale-105 hover:brightness-110 transition-all overflow-hidden cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#19e68c] text-[11px] font-bold text-black ring-2 ring-black transition-all hover:brightness-110 cursor-pointer"
           >
             <span className="w-full h-full flex items-center justify-center bg-[#19e68c] text-black font-bold">AA</span>
           </button>

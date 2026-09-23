@@ -54,7 +54,9 @@ export default function QueuePanel({ onClose, expanded, onToggleExpand }: Props)
                 <h3 className="text-sm font-bold text-white mb-2">Now playing</h3>
                 {tracks.filter((t) => t.id === state.currentTrack).map((t) => (
                   <div key={t.id} className="flex items-center gap-3 p-2 bg-[#232323] rounded-md">
-                    <img src={t.artwork_url || ''} alt="" className="w-12 h-12 bg-[#282828] rounded object-cover flex-shrink-0" />
+                    <div className="w-12 h-12 bg-[#282828] rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {t.artwork_url ? <img src={t.artwork_url} alt="" className="w-full h-full object-cover" /> : <MusicNoteIcon className="w-5 h-5 text-[#b3b3b3]" />}
+                    </div>
                     <div className="min-w-0">
                       <div className="text-sm text-[#1DB954] truncate">{t.title}</div>
                       <div className="text-xs text-[#b3b3b3] truncate">{t.artist}</div>

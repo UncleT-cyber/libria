@@ -61,6 +61,7 @@ function Card({ track, subtitle }: { track: Track; subtitle: string }) {
 
 export default function HomeView() {
   const { tracks } = useLibraryStore();
+  const { playTrack } = usePlayerStore();
   const topFilters = ['All', 'Music', 'Podcasts', 'Audiobooks'] as const;
   const [activeTop, setActiveTop] = useState<(typeof topFilters)[number]>('All');
 
@@ -82,9 +83,32 @@ export default function HomeView() {
     }, {} as Record<string, Track>)
   ).slice(0, 10);
 
+  const artists = Object.values(
+    filteredByTop.reduce((acc, track) => {
+      if (!acc[track.artist]) acc[track.artist] = { name: track.artist, track };
+      return acc;
+    }, {} as Record<string, { name: string; track: Track }>),
+  ).slice(0, 8);
+
   return (
-    <div className="px-6 pb-10">
-      {/* Top filter pills - All/Music/Podcasts/Audiobooks as in Spotify reference */}
+    <div className="pb-10">
+      <div className="bg-gradient-to-b from-[#2a2a2a] to-[#121212] px-6 pt-8 pb-6">
+        <div className="flex items-end gap-6">
+          <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#282828] flex items-center justify-center text-[#b3b3b3] shrink-0 shadow-2xl">
+            <svg viewBox="0 0 24 24" className="w-16 h-16" fill="currentColor" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c1.5-3.5 4.2-5 8-5s6.5 1.5 8 5" />
+            </svg>
+          </div>
+          <div className="min-w-0 pb-1">
+            <div className="text-sm font-medium">Profile</div>
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight truncate">Libria</h1>
+            <p className="mt-4 text-sm text-[#b3b3b3]">Your library</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6">
       <div className="flex gap-2 py-3 sticky top-0 bg-[#121212] z-10">
         {topFilters.map((f) => (
           <button
@@ -96,6 +120,24 @@ export default function HomeView() {
           </button>
         ))}
       </div>
+      <h2 className="text-2xl font-bold text-white mt-4 mb-1">Top artists this month</h2>
+      <p className="text-sm text-[#b3b3b3] mb-4">Only visible to you</p>
+      {artists.length > 0 ? (
+        <div className="flex gap-4 overflow-x-auto pb-6">
+          {artists.map((artist) => (
+            <button key={artist.name} onClick={() => artist.track && playTrack(artist.track.id)} className="w-40 shrink-0 text-left group">
+              <div className="w-40 h-40 rounded-full bg-[#282828] overflow-hidden mb-3 flex items-center justify-center text-3xl font-bold text-white">
+                {artist.track?.artwork_url ? <img src={artist.track.artwork_url} alt="" className="w-full h-full object-cover" /> : artist.name.slice(0, 1)}
+              </div>
+              <div className="font-bold truncate">{artist.name}</div>
+              <div className="text-sm text-[#b3b3b3]">Artist</div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-[#b3b3b3] mb-8">Artists from songs in Downloads show up here.</p>
+      )}
+
       <h1 className="text-3xl font-bold text-white mb-4 mt-2">{greeting()}</h1>
 
       {quick.length > 0 && (
@@ -137,9 +179,10 @@ export default function HomeView() {
       {tracks.length === 0 && (
         <div className="mt-16 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Your library is empty</h2>
-          <p className="text-[#b3b3b3]">Hit the + in Your Library to scan folders, import files, or pull a Spotify URL.</p>
+          <p className="text-[#b3b3b3]">Use + in Your Library to import audio you already have. New files open in Downloads.</p>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -12,11 +12,12 @@ import {
 interface AddMusicModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onImported?: () => void;
 }
 
 type Mode = 'menu' | 'folder' | 'spotify';
 
-export default function AddMusicModal({ isOpen, onClose }: AddMusicModalProps) {
+export default function AddMusicModal({ isOpen, onClose, onImported }: AddMusicModalProps) {
   const [mode, setMode] = useState<Mode>('menu');
   const [folderPath, setFolderPath] = useState('');
   const [spotifyUrl, setSpotifyUrl] = useState('');
@@ -41,6 +42,7 @@ export default function AddMusicModal({ isOpen, onClose }: AddMusicModalProps) {
     setError(null);
     try {
       await action();
+      onImported?.();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

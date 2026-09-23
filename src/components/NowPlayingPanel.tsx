@@ -23,9 +23,10 @@ interface NowPlayingProps {
   onClose?: () => void;
   expanded?: boolean;
   onToggleExpand?: () => void;
+  onLyrics?: () => void;
 }
 
-export default function NowPlayingPanel({ onClose, expanded, onToggleExpand }: NowPlayingProps = {} as NowPlayingProps) {
+export default function NowPlayingPanel({ onClose, expanded, onToggleExpand, onLyrics }: NowPlayingProps = {} as NowPlayingProps) {
   const { state } = usePlayerStore();
   const { tracks } = useLibraryStore();
   const track: Track | undefined = tracks.find((t) => t.id === state.currentTrack);
@@ -46,6 +47,11 @@ export default function NowPlayingPanel({ onClose, expanded, onToggleExpand }: N
           {track ? (track.album || 'Now playing') : 'Now playing'}
         </h2>
         <div className="flex items-center gap-1">
+          {onLyrics && (
+            <button onClick={onLyrics} className="px-2 h-8 text-sm font-bold text-[#b3b3b3] hover:text-white" title="Lyrics">
+              Lyrics
+            </button>
+          )}
           {onToggleExpand && (
             <button onClick={onToggleExpand} className="w-8 h-8 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323]" title={expanded ? 'Collapse' : 'Expand'}>
               <ExpandArrowIcon className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />

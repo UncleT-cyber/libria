@@ -9,9 +9,10 @@ import {
   ExpandArrowIcon,
   ListSortIcon,
   PinIcon,
+  DownloadIcon,
 } from './icons';
 
-export type ViewName = 'home' | 'search' | 'songs' | 'albums' | 'artists' | 'playlists';
+export type ViewName = 'home' | 'search' | 'songs' | 'albums' | 'artists' | 'playlists' | 'downloads';
 
 interface SidebarProps {
   currentView: ViewName;
@@ -37,7 +38,7 @@ export default function Sidebar({ currentView, collapsed, onViewChange, onToggle
     }`;
 
   return (
-    <aside className={`${width} flex-shrink-0 flex flex-col bg-[#121212] rounded-lg transition-all duration-200 min-h-0`}>
+    <aside className={`${width} h-full min-h-0 flex-shrink-0 flex flex-col bg-[#121212] rounded-lg overflow-hidden transition-all duration-200`}>
       {/* Header: bookshelf icon + Your Library + Plus + Expand Arrow */}
       <div className={`flex items-center h-14 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
         <button
@@ -104,7 +105,29 @@ export default function Sidebar({ currentView, collapsed, onViewChange, onToggle
       )}
 
       {/* Items */}
-      <div className="flex-1 overflow-y-auto px-2 pb-2">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 pb-2">
+        <button
+          onClick={() => onViewChange('downloads')}
+          title={collapsed ? 'Downloads' : undefined}
+          className={
+            collapsed
+              ? 'w-full flex justify-center mb-1 rounded-md hover:bg-[#1a1a1a] p-1 transition-colors'
+              : `w-full flex items-center gap-3 p-2 rounded-md hover:bg-[#1a1a1a] transition-colors text-left ${currentView === 'downloads' ? 'bg-[#1a1a1a]' : ''}`
+          }
+        >
+          <div className="w-12 h-12 rounded-[4px] bg-[#1DB954] flex items-center justify-center text-black flex-shrink-0">
+            <DownloadIcon className="w-5 h-5" />
+          </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <div className={`truncate text-[14px] leading-5 ${currentView === 'downloads' ? 'text-[#1DB954]' : 'text-white'}`}>Downloads</div>
+              <div className="truncate text-[12px] leading-4 text-[#a7a7a7] flex items-center gap-1.5">
+                <PinIcon className="w-3 h-3 text-[#1DB954] shrink-0" />
+                <span>Folder • {tracks.length} saved</span>
+              </div>
+            </div>
+          )}
+        </button>
         {tracks.length === 0 ? (
           !collapsed ? (
             <div className="m-2 p-4 bg-[#242424] rounded-lg">
