@@ -204,11 +204,11 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
           className="spotify-range hidden h-1 w-[93px] sm:block"
           style={{ background: `linear-gradient(to right, #fff ${pct(volumeShown * 100)}, #535353 ${pct(volumeShown * 100)})` }}
         />
-        <button onClick={onFullscreen} title={isFullscreenActive ? 'Exit full screen' : 'Full screen'} className={`ml-1 flex h-8 w-8 items-center justify-center ${isFullscreenActive ? 'text-white' : 'text-[#b3b3b3] hover:text-white'}`}>
-          <PlayerFullscreenIcon className="h-4 w-4" />
-        </button>
-        <button onClick={onToggleMini} title={isMiniActive ? 'Exit mini player' : 'Mini player'} className={`flex h-8 w-8 items-center justify-center ${isMiniActive ? 'text-white' : 'text-[#b3b3b3] hover:text-white'}`}>
+        <button onClick={onToggleMini} title={isMiniActive ? 'Exit mini player' : 'Mini player'} className={`ml-1 flex h-8 w-8 items-center justify-center ${isMiniActive ? 'text-white' : 'text-[#b3b3b3] hover:text-white'}`}>
           <PlayerMiniIcon className="h-4 w-4" />
+        </button>
+        <button onClick={onFullscreen} title={isFullscreenActive ? 'Exit full screen' : 'Full screen'} className={`flex h-8 w-8 items-center justify-center ${isFullscreenActive ? 'text-white' : 'text-[#b3b3b3] hover:text-white'}`}>
+          <PlayerFullscreenIcon className="h-4 w-4" />
         </button>
       </div>
     </div>
