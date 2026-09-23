@@ -1,6 +1,8 @@
 import { usePlayerStore } from '../stores/player';
 import { useLibraryStore } from '../stores/library';
-import { useState } from 'react';
+import { canvasFor, coverFor, useVisuals } from '../lib/visuals';
+import CanvasView from './CanvasView';
+import { useEffect, useState } from 'react';
 import {
   PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
   MusicNoteIcon, PlayerMicIcon, PlayerQueueIcon,
@@ -38,8 +40,14 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
   } = usePlayerStore();
   const { tracks, favorites, toggleFavorite } = useLibraryStore();
   const [muted, setMuted] = useState(false);
+  const visuals = useVisuals();
+  useEffect(() => {
+    void visuals.load();
+  }, [visuals.load]);
+  const canvas = canvasFor(visuals.items, state.currentTrack);
 
   const activeTrack = tracks.find((t) => t.id === state.currentTrack);
+  const cover = coverFor(visuals.items, state.currentTrack)?.url || activeTrack?.artwork_url;
   const playable = tracks.filter((t) => !!t.file_path);
   const playNeighbor = (dir: 1 | -1) => {
     if (playable.length === 0) return;
@@ -74,8 +82,10 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, justifySelf: 'start' }}>
         <button onClick={onToggleNowPlaying} title="Now playing view" className="h-16 w-16 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] shrink-0 overflow-hidden hover:opacity-80 transition-opacity">
-          {activeTrack?.artwork_url ? (
-            <img src={activeTrack.artwork_url} alt={activeTrack.album || activeTrack.title} className="w-full h-full object-cover" />
+          {state.isPlaying && canvas ? (
+            <CanvasView src={canvas.url} className="h-full w-full object-cover" />
+          ) : cover ? (
+            <img src={cover} alt={activeTrack?.album || activeTrack?.title || ''} className="w-full h-full object-cover" />
           ) : (
             <MusicNoteIcon className={`h-7 w-7 ${activeTrack ? '' : 'opacity-50'}`} />
           )}

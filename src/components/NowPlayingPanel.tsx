@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { usePlayerStore } from '../stores/player';
 import { useLibraryStore, type Track } from '../stores/library';
+import { canvasFor, coverFor, useVisuals } from '../lib/visuals';
+import CanvasView from './CanvasView';
 import {
   MusicNoteIcon,
   SpotifyMarkIcon,
@@ -30,6 +33,12 @@ export default function NowPlayingPanel({ onClose, expanded, onToggleExpand, onL
   const { state } = usePlayerStore();
   const { tracks } = useLibraryStore();
   const track: Track | undefined = tracks.find((t) => t.id === state.currentTrack);
+  const visuals = useVisuals();
+  useEffect(() => {
+    void visuals.load();
+  }, [visuals.load]);
+  const canvas = canvasFor(visuals.items, track?.id);
+  const cover = coverFor(visuals.items, track?.id)?.url || track?.artwork_url;
 
   // Video-backed references (YouTube/Vimeo/video hosts) get the dynamic
   // canvas; the video is also surfaced under "Related music videos".
@@ -70,9 +79,13 @@ export default function NowPlayingPanel({ onClose, expanded, onToggleExpand, onL
       ) : (
         <div className="px-4 pb-4 space-y-4">
           {/* High-res media / album art header */}
-          {track.artwork_url ? (
+          {state.isPlaying && canvas ? (
+            <div className="mx-auto aspect-[9/16] w-[220px] overflow-hidden rounded bg-black">
+              <CanvasView src={canvas.url} className="h-full w-full object-cover" />
+            </div>
+          ) : cover ? (
             <img
-              src={track.artwork_url}
+              src={cover}
               alt={track.album || track.title}
               className="w-full aspect-square object-cover rounded mb-0"
             />
