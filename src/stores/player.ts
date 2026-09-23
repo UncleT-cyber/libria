@@ -14,6 +14,7 @@ interface PlayerStore {
   shuffle: boolean;
   repeatMode: 'off' | 'all' | 'one';
   history: string[];
+  queue: string[];
   playTrack: (trackId: string) => Promise<void>;
   pausePlayback: () => Promise<void>;
   stopPlayback: () => Promise<void>;
@@ -21,6 +22,7 @@ interface PlayerStore {
   setVolume: (volume: number) => void;
   toggleShuffle: () => void;
   cycleRepeat: () => void;
+  enqueue: (trackId: string) => void;
   fetchPlayerState: () => Promise<void>;
   tick: () => void;
 }
@@ -83,6 +85,11 @@ export const usePlayerStore = create<PlayerStore>((set, get) => {
     shuffle: false,
     repeatMode: 'off',
     history: [],
+    queue: [],
+    enqueue: (trackId) =>
+      set((state) => ({
+        queue: state.queue.includes(trackId) ? state.queue : [...state.queue, trackId],
+      })),
 
     toggleShuffle: () => set((s) => ({ shuffle: !s.shuffle })),
     cycleRepeat: () =>

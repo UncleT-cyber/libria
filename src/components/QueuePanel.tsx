@@ -11,10 +11,17 @@ interface Props {
 
 export default function QueuePanel({ onClose, expanded, onToggleExpand }: Props) {
   const { tracks } = useLibraryStore();
-  const { state, history, playTrack } = usePlayerStore();
+  const { state, history, playTrack, queue } = usePlayerStore();
   const currentIdx = tracks.findIndex((t) => t.id === state.currentTrack);
-  const nextUp = currentIdx >= 0 ? tracks.slice(currentIdx + 1, currentIdx + 6) : tracks.slice(0, 5);
-  const queue = tracks.filter((_, i) => i !== currentIdx).slice(0, 10);
+  const queued = queue
+    .map((id) => tracks.find((t) => t.id === id))
+    .filter((t): t is NonNullable<typeof t> => Boolean(t));
+  const nextUp = queued.length
+    ? queued
+    : currentIdx >= 0
+      ? tracks.slice(currentIdx + 1, currentIdx + 6)
+      : tracks.slice(0, 5);
+  const later = tracks.filter((_, i) => i !== currentIdx).slice(0, 10);
   const recentlyPlayed = history
     .map((id) => tracks.find((t) => t.id === id))
     .filter(Boolean) as typeof tracks;
@@ -85,8 +92,8 @@ export default function QueuePanel({ onClose, expanded, onToggleExpand }: Props)
               )}
             </div>
             <div className="px-2">
-              <h3 className="text-sm font-bold text-white mb-2">Queue ({queue.length})</h3>
-              {queue.slice(0, 10).map((t) => (
+              <h3 className="text-sm font-bold text-white mb-2">Queue ({later.length})</h3>
+              {later.slice(0, 10).map((t) => (
                 <button key={t.id} onClick={() => playTrack(t.id)} className="w-full flex items-center gap-3 p-2 hover:bg-[#1a1a1a] rounded-md text-left group">
                   <div className="w-12 h-12 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
                     {t.artwork_url ? <img src={t.artwork_url} alt="" className="w-full h-full object-cover" /> : <MusicNoteIcon className="w-5 h-5" />}

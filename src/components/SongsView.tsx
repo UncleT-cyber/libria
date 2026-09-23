@@ -1,8 +1,9 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useLibraryStore, type Track } from '../stores/library';
 import { usePlayerStore } from '../stores/player';
 import { PlayIcon, PauseIcon, MusicNoteIcon, ClockIcon, CheckCircleIcon, MoreIcon, ShuffleIcon } from './icons';
+import TrackMenu, { hiddenTrackIds } from './TrackMenu';
 
 const fmt = (seconds: number) => {
   if (!seconds || !Number.isFinite(seconds)) return '–';
@@ -21,9 +22,10 @@ function EqBars() {
   );
 }
 
-export function TrackTable({ rows, onAddMusic }: { rows: Track[]; onAddMusic?: () => void }) {
+export function TrackTable({ rows, onAddMusic, onArtist }: { rows: Track[]; onAddMusic?: () => void; onArtist?: (artist: string) => void }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const { state, playTrack, pausePlayback } = usePlayerStore();
+  const [menu, setMenu] = useState<{ track: Track; anchor: DOMRect } | null>(null);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -133,14 +135,32 @@ export function TrackTable({ rows, onAddMusic }: { rows: Track[]; onAddMusic?: (
 
               <span className="truncate text-sm text-[#b3b3b3]">{track.album || '—'}</span>
 
-              <span className="text-sm text-[#b3b3b3] text-right pr-2 flex items-center justify-end gap-3">
-                <MoreIcon className="w-4 h-4 opacity-0 group-hover:opacity-100" />
+              <span className="text-sm text-[#b3b3b3] text-right pr-2 flex items-center justify-end gap-2">
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    const anchor = event.currentTarget.getBoundingClientRect();
+                    setMenu({ track, anchor });
+                  }}
+                  title="More options for this song"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-[#b3b3b3] opacity-0 hover:text-white group-hover:opacity-100"
+                >
+                  <MoreIcon className="w-4 h-4" />
+                </button>
                 {fmt(track.duration)}
               </span>
             </div>
           );
         })}
       </div>
+      {menu && (
+        <TrackMenu
+          track={menu.track}
+          anchor={menu.anchor}
+          onArtist={onArtist}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </div>
   );
 }
@@ -148,11 +168,21 @@ export function TrackTable({ rows, onAddMusic }: { rows: Track[]; onAddMusic?: (
 export default function SongsView({ onAddMusic, query = '' }: { onAddMusic?: () => void; query?: string }) {
   const { tracks } = useLibraryStore();
   const { state, playTrack, shuffle, toggleShuffle } = usePlayerStore();
+  const [artistFilter, setArtistFilter] = useState<string | null>(null);
+  const [menu, setMenu] = useState<{ track: Track; anchor: DOMRect } | null>(null);
+  const [hiddenTick, setHiddenTick] = useState(0);
+  const hidden = hiddenTrackIds();
+  void hiddenTick;
+  const visible = tracks.filter((track) => !hidden.includes(track.id));
+  const scoped = artistFilter ? visible.filter((track) => track.artist === artistFilter) : visible;
   const filtered = query
-    ? tracks.filter((t) =>
+    ? scoped.filter((t) =>
         `${t.title} ${t.artist} ${t.album}`.toLowerCase().includes(query.toLowerCase())
       )
-    : tracks;
+    : scoped;
+  const menuTrack = state.currentTrack
+    ? tracks.find((track) => track.id === state.currentTrack) ?? filtered[0]
+    : filtered[0];
 
   const totalSec = tracks.reduce((acc, t) => acc + (t.duration || 0), 0);
   const hrs = Math.floor(totalSec / 3600);
@@ -174,6 +204,14 @@ export default function SongsView({ onAddMusic, query = '' }: { onAddMusic?: () 
             </h1>
             <div className="text-sm text-[#b3b3b3]">
               <span className="text-white font-bold">Libria</span>
+              {artistFilter && (
+                <>
+                  <span className="mx-1">•</span>
+                  <button onClick={() => setArtistFilter(null)} className="text-white hover:underline" title="Clear artist">
+                    {artistFilter}
+                  </button>
+                </>
+              )}
               <span className="mx-1">•</span>
               {query ? `${filtered.length} of ${tracks.length} songs` : `${tracks.length} songs`}
               {totalSec > 0 && (
@@ -203,9 +241,30 @@ export default function SongsView({ onAddMusic, query = '' }: { onAddMusic?: () 
           <ShuffleIcon className="w-8 h-8" />
           {shuffle && <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />}
         </button>
+        {menuTrack && (
+          <button
+            onClick={(event) => setMenu({ track: menuTrack, anchor: event.currentTarget.getBoundingClientRect() })}
+            title="More options for the playing song"
+            className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] hover:text-white"
+          >
+            <MoreIcon className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
-      <TrackTable rows={filtered} onAddMusic={onAddMusic} />
+      {menu && (
+        <TrackMenu
+          track={menu.track}
+          anchor={menu.anchor}
+          onArtist={setArtistFilter}
+          onClose={() => {
+            setMenu(null);
+            setHiddenTick((n) => n + 1);
+          }}
+        />
+      )}
+
+      <TrackTable rows={filtered} onAddMusic={onAddMusic} onArtist={setArtistFilter} />
     </div>
   );
 }
