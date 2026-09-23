@@ -36,47 +36,43 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
   const noDrag = { WebkitAppRegion: 'no-drag' } as React.CSSProperties;
 
   return (
-    <div style={drag} className="relative sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 bg-black pr-3 select-none">
-        <div className="h-full">
-          <div className="absolute flex items-center gap-0.5" style={{ ...noDrag, left: 70, top: 2 }}>
+    <div style={drag} className="relative sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center bg-black px-4 select-none">
+        <div className="flex h-full items-center gap-1" style={noDrag}>
           <button
             onClick={onGoBack}
             disabled={!canGoBack}
             title={canGoBack ? 'Go back' : 'No back history'}
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-white ${canGoBack ? 'cursor-pointer hover:bg-[#1a1a1a]' : 'cursor-not-allowed opacity-40'}`}
+            className={`flex h-10 w-10 items-center justify-center text-white ${canGoBack ? 'cursor-pointer hover:text-white' : 'cursor-not-allowed opacity-40'}`}
             style={noDrag}
           >
-            <ChevronLeftIcon className="h-4 w-4 shrink-0" />
+            <ChevronLeftIcon className="h-6 w-6 shrink-0" />
           </button>
           <button
             onClick={onGoForward}
             disabled={!canGoForward}
             title={canGoForward ? 'Go forward' : 'No forward history'}
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-white ${canGoForward ? 'cursor-pointer hover:bg-[#1a1a1a]' : 'cursor-not-allowed opacity-40'}`}
+            className={`flex h-10 w-10 items-center justify-center text-white ${canGoForward ? 'cursor-pointer hover:text-white' : 'cursor-not-allowed opacity-40'}`}
             style={noDrag}
           >
-            <ChevronRightIcon className="h-4 w-4 shrink-0" />
+            <ChevronRightIcon className="h-6 w-6 shrink-0" />
           </button>
-          </div>
         </div>
 
       <div className="flex min-w-0 items-center justify-center gap-2" style={noDrag}>
         <button
           onClick={() => onNavigate('home')}
           title="Home"
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
-            currentView === 'home' ? 'bg-white text-black' : 'bg-[#242424] text-white hover:bg-[#2a2a2a]'
-          }`}
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-white transition-colors hover:bg-[#333]"
         >
-          {currentView === 'home' ? <HomeIcon className="h-[18px] w-[18px]" /> : <HomeOutlineIcon className="h-[18px] w-[18px]" />}
+          {currentView === 'home' ? <HomeIcon className="h-6 w-6" /> : <HomeOutlineIcon className="h-6 w-6" />}
         </button>
-        <div className="group relative flex h-10 w-[420px] max-w-[min(420px,38vw)] items-center rounded-full border border-transparent bg-[#242424] transition-colors hover:bg-[#2a2a2a] focus-within:border-white focus-within:bg-[#2a2a2a]">
+        <div className="group relative flex h-12 w-[520px] max-w-[min(520px,46vw)] items-center rounded-full bg-[#2a2a2a] transition-colors hover:bg-[#333] focus-within:bg-[#333]">
           <button
             onClick={() => onNavigate('search')}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white"
             title="Search"
           >
-            <SearchIcon className="h-[18px] w-[18px]" />
+            <SearchIcon className="h-6 w-6" />
           </button>
           <input
             type="text"
@@ -84,40 +80,39 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
             onFocus={() => onNavigate('search')}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="What do you want to play?"
-            className="h-full w-full rounded-full bg-transparent pl-10 pr-16 text-[15px] font-medium text-white outline-none placeholder:font-normal placeholder:text-[#b3b3b3]"
+            className="h-full w-full rounded-full bg-transparent pl-14 pr-16 text-[15px] font-medium text-white outline-none placeholder:font-normal placeholder:text-[#b3b3b3]"
           />
-          <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
+          <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-3">
             {query ? (
               <button
                 onClick={() => onQueryChange('')}
                 title="Clear search"
-                className="p-1 text-[#b3b3b3] transition-colors hover:text-white"
+                className="text-[#b3b3b3] transition-colors hover:text-white"
               >
-                <CloseIcon className="h-4 w-4" />
+                <CloseIcon className="h-5 w-5" />
               </button>
             ) : (
-              <div className="mx-1 h-4 w-px bg-[#3e3e3e]" />
+              <div className="h-6 w-px bg-[#4d4d4d]" />
             )}
             <button
               onClick={() => onNavigate('search')}
               title="Browse"
-              className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] transition-colors hover:text-white"
+              className="flex h-8 w-8 items-center justify-center text-white"
             >
-              <BrowseIcon className="h-[18px] w-[18px]" />
+              <BrowseIcon className="h-5 w-5" />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="relative flex items-center justify-end gap-2" style={noDrag}>
+      <div className="relative flex items-center justify-end gap-4 pr-1" style={noDrag}>
         <div className="relative">
           <button
             onClick={() => setNotifOpen((v) => !v)}
             title="Notifications"
-            className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#1f1f1f] text-white transition-colors hover:bg-[#2a2a2a]"
+            className="relative flex h-10 w-10 items-center justify-center text-white hover:text-white"
           >
-            <BellIcon className="h-[18px] w-[18px]" />
-            <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full border border-black bg-[#3d91f4]" />
+            <BellIcon className="h-6 w-6" />
           </button>
           {notifOpen && (
             <>
@@ -135,17 +130,18 @@ export default function TopBar({ currentView, query, onQueryChange, onNavigate, 
         <button
           onClick={onToggleListening}
           title="Listening activity"
-          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${listeningOpen ? 'bg-white text-black' : 'bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]'}`}
+          className={`flex h-10 w-10 items-center justify-center ${listeningOpen ? 'text-white' : 'text-white hover:scale-105'}`}
         >
-          <FriendsIcon className="h-[18px] w-[18px]" />
+          <FriendsIcon className="h-6 w-6" />
         </button>
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            title="Profile - Anthony Abah"
-            className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#19e68c] text-[11px] font-bold text-black ring-2 ring-black transition-all hover:brightness-110 cursor-pointer"
+            title="Profile"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full"
+            style={{ background: 'conic-gradient(#1ed760 0 80deg, #3a3a3a 80deg 360deg)' }}
           >
-            <span className="w-full h-full flex items-center justify-center bg-[#19e68c] text-black font-bold">AA</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2a2a2a] text-[10px] font-bold text-white">1:5</span>
           </button>
           {menuOpen && (
             <>
