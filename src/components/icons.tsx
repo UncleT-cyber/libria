@@ -70,11 +70,8 @@ export const ShuffleIcon = (p: P) => (
   </svg>
 );
 export const RepeatIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3.2 5.2h7.2a2 2 0 0 1 2 2v1.2" />
-    <path d="M10.6 3.4 12.4 5.2 10.6 7" />
-    <path d="M12.8 10.8H5.6a2 2 0 0 1-2-2V7.6" />
-    <path d="M5.4 12.6 3.6 10.8l1.8-1.8" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M11.15 1.35 13.7 3.7 11.15 6.05V4.35H4.55A2.35 2.35 0 0 0 2.2 6.7v1.15H1V6.7A3.55 3.55 0 0 1 4.55 3.15h6.6V1.35zM4.85 14.65 2.3 12.3l2.55-2.35v1.7h6.6a2.35 2.35 0 0 0 2.35-2.35V8.15H15v1.15a3.55 3.55 0 0 1-3.55 3.55H4.85v1.8z" />
   </svg>
 );
 
@@ -187,9 +184,16 @@ export const PlayerPencilIcon = (p: P) => (
   </svg>
 );
 
+export const PlayerMicIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 1.2a2.35 2.35 0 0 0-2.35 2.35v3.7A2.35 2.35 0 0 0 8 9.6a2.35 2.35 0 0 0 2.35-2.35v-3.7A2.35 2.35 0 0 0 8 1.2z" />
+    <path d="M4.15 7.15a.7.7 0 0 0-1.4.1 5.25 5.25 0 0 0 4.5 4.55v1.5H5.2V14.8h5.6v-1.5H8.75v-1.5a5.25 5.25 0 0 0 4.5-4.55.7.7 0 0 0-1.4-.1 3.85 3.85 0 0 1-7.7 0z" />
+  </svg>
+);
+
 export const PlayerQueueIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round">
-    <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M1.5 3.15h13a.85.85 0 0 1 0 1.7h-13a.85.85 0 0 1 0-1.7zm0 4h13a.85.85 0 0 1 0 1.7h-13a.85.85 0 0 1 0-1.7zm0 4h13a.85.85 0 0 1 0 1.7h-13a.85.85 0 0 1 0-1.7z" />
   </svg>
 );
 
@@ -222,9 +226,9 @@ export const PlayerFullscreenIcon = (p: P) => (
 );
 
 export const PlayerMiniIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round">
-    <rect x="1.8" y="2.6" width="12.4" height="9.2" rx="1.2" />
-    <rect x="8.2" y="7.4" width="4.6" height="3.2" rx="0.4" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.35} strokeLinejoin="round">
+    <rect x="1.6" y="2.3" width="12.8" height="9.6" rx="1.3" />
+    <rect x="8.1" y="7.2" width="5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
   </svg>
 );
 

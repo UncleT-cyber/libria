@@ -3,7 +3,7 @@ import { useLibraryStore } from '../stores/library';
 import { useState } from 'react';
 import {
   PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
-  MusicNoteIcon, PlayerPencilIcon, PlayerQueueIcon,
+  MusicNoteIcon, PlayerMicIcon, PlayerQueueIcon,
   PlayerVolumeIcon, PlayerVolumeMuteIcon, PlayerFullscreenIcon,
   PlayerMiniIcon, PlayerDeviceIcon, PlayerCloseIcon, PlayerAddIcon, PlayerAddedIcon,
 } from './icons';
@@ -172,8 +172,8 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', justifySelf: 'end', width: '100%', gap: 2 }}>
-        <button onClick={onToggleNowPlaying} title="Now playing" className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] hover:text-white">
-          <PlayerPencilIcon className="h-4 w-4" />
+        <button onClick={onToggleLyrics} title="Lyrics" className={`flex h-8 w-8 items-center justify-center ${activePane === 'lyrics' ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}>
+          <PlayerMicIcon className="h-4 w-4" />
         </button>
         <button onClick={onToggleQueue} title="Queue" className={`relative flex h-8 w-8 items-center justify-center ${activePane === 'queue' ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}>
           <PlayerQueueIcon className="h-4 w-4" />
