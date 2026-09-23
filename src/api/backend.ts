@@ -4,17 +4,20 @@ import type { Track, LibraryStats } from '../stores/library';
 // - Local dev: Vite proxies /api -> http://localhost:12001 (libria/server.py)
 // - Prod: VITE_API_URL=https://libria-api.onrender.com/api -> Render Python backend
 // Falls back to same-origin /api for Vercel serverless functions if present.
-const _rawBase = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_API_URL || '/api';
-const API_BASE = _rawBase.replace(/\/$/, ''); // strip trailing slash
-
+// Tauri desktop must also use HTTP API (not Rust stubs) so it shares the Python downloader/player.
+const _envBase = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_API_URL;
 declare global {
   interface Window {
     __TAURI_INTERNALS__?: unknown;
   }
 }
-
-export const isTauri =
+export const isTauriWindow =
   typeof window !== 'undefined' && window.__TAURI_INTERNALS__ !== undefined;
+const _rawBase = _envBase || (isTauriWindow ? 'http://localhost:12001/api' : '/api');
+const API_BASE = _rawBase.replace(/\/$/, ''); // strip trailing slash
+// Always use HTTP API even inside Tauri webview so desktop grabs/downloads exactly like web.
+// The Rust Tauri commands are stubs (audio/player.rs TODO) and would silently no-op.
+export const isTauri = false;
 
 // Commands mirrored by both the Tauri Rust backend and libria/server.py
 interface CommandMap {

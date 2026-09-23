@@ -57,3 +57,21 @@ def test_album_collision_row_has_collection_title():
     payload = track_payload(parse_spotify_ref("https://open.spotify.com/album/abc123"))
     assert payload["title"].startswith("Spotify album")
     assert payload["album"] == payload["title"]
+
+
+def test_parse_show_and_podcast():
+    assert parse_spotify_ref("https://open.spotify.com/show/xyz")["kind"] == "show"
+    assert parse_spotify_ref("https://open.spotify.com/podcast/pqr")["kind"] == "podcast"
+
+
+def test_parse_spotify_uri_show():
+    ref = parse_spotify_ref("spotify:show:123")
+    assert ref["kind"] == "show"
+    assert ref["id"] == "123"
+
+
+def test_track_payload_with_show():
+    payload = track_payload(parse_spotify_ref("https://open.spotify.com/show/abc"), {"title": "My Podcast"})
+    assert payload["track_id"] == "show:abc"
+    assert payload["title"] == "My Podcast"
+    assert payload["artist"] == "Spotify"

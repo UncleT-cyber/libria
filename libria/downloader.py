@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import queue
+import shutil
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -47,10 +48,20 @@ def yt_dlp_archiver(job: DownloadJob, dest_dir: str) -> str:
     Spotify URLs are DRM - we translate them to a YouTube search via
     ytsearch1:\"{title} {artist}\" so the user gets the matching audio
     without needing Spotify Premium.
+
+    When ffmpeg is unavailable yt-dlp still downloads the audio stream;
+    the file keeps whatever container yt-dlp delivers (typically .webm or
+    .m4a). Tagging still works because mutagen handles those containers.
     """
     import yt_dlp  # lazy: heavyweight optional dependency
 
+    # Album-aware directory: songs land under <dest_dir>/<album>/
+    album = job.metadata.get("album") or ""
+    if album:
+        dest_dir = str(Path(dest_dir) / album)
     Path(dest_dir).mkdir(parents=True, exist_ok=True)
+
+    # yt-dlp will produce whatever extension it downloads; preserve it
     outtmpl = str(Path(dest_dir) / "%(title)s-%(id)s.%(ext)s")
     # Spotify direct URLs always fail (DRM) - search YouTube instead
     is_spotify = "spotify.com" in job.url or job.url.startswith("spotify:")
@@ -63,7 +74,6 @@ def yt_dlp_archiver(job: DownloadJob, dest_dir: str) -> str:
     else:
         target = job.url
 
-    import shutil
     has_ffmpeg = shutil.which("ffmpeg") is not None
     options: dict = {
         "format": "bestaudio/best",

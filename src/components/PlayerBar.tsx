@@ -3,8 +3,8 @@ import { useLibraryStore } from '../stores/library';
 import { useState } from 'react';
 import {
   PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
-  HeartIcon, CheckCircleIcon, MusicNoteIcon, MicIcon, QueueIcon,
-  VolumeIcon, VolumeMuteIcon, FullscreenIcon, NowPlayingIcon,
+  MusicNoteIcon, MicIcon, QueueIcon,
+  VolumeIcon, VolumeMuteIcon, FullscreenIcon,
   MiniPlayerIcon, DeviceIcon,
 } from './icons';
 
@@ -17,20 +17,21 @@ const fmt = (seconds: number) => {
 
 const pct = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
 
-type RightPane = 'nowPlaying' | 'lyrics' | 'queue' | 'device' | null;
+type RightPane = 'lyrics' | 'queue' | 'device' | null;
 
 interface PlayerBarProps {
-  nowPlayingOpen: boolean;
-  onToggleNowPlaying: () => void;
   onFullscreen: () => void;
   activePane?: RightPane;
+  isMiniActive?: boolean;
+  isFullscreenActive?: boolean;
   onToggleLyrics?: () => void;
   onToggleQueue?: () => void;
   onToggleDevice?: () => void;
   onToggleMini?: () => void;
+  onToggleNowPlaying?: () => void;
 }
 
-export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullscreen, activePane, onToggleLyrics, onToggleQueue, onToggleDevice, onToggleMini }: PlayerBarProps) {
+export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFullscreenActive, onToggleLyrics, onToggleQueue, onToggleDevice, onToggleMini, onToggleNowPlaying }: PlayerBarProps) {
   const {
     state, playTrack, pausePlayback, stopPlayback, seekPlayback, setVolume,
     shuffle, repeatMode, toggleShuffle, cycleRepeat,
@@ -60,10 +61,10 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
   const progressPct = state.duration > 0 ? (state.position / state.duration) * 100 : 0;
 
   return (
-    <div className="h-[86px] flex-shrink-0 bg-black px-3 flex items-center justify-between gap-6 rounded-lg">
-      {/* Left (Track Info): 56x56 cover, title 14px bold, artist 11px grey, heart stroke 2px */}
-      <div className="flex items-center gap-3 w-[30%] min-w-[180px] max-w-sm">
-        <div className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden">
+    <div className="h-[90px] flex-shrink-0 bg-black px-0 grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-lg border-t border-[#1a1a1a]/50">
+      {/* Left (Track Info): anchored left */}
+      <div className="flex items-center gap-3 min-w-0 max-w-sm justify-self-start">
+        <button onClick={onToggleNowPlaying} title="Now playing view" className="w-14 h-14 bg-[#282828] rounded flex items-center justify-center text-[#b3b3b3] flex-shrink-0 overflow-hidden hover:opacity-80 transition-opacity">
           {activeTrack?.artwork_url ? (
             <img src={activeTrack.artwork_url} alt={activeTrack.album || activeTrack.title} className="w-full h-full object-cover" />
           ) : activeTrack ? (
@@ -71,7 +72,7 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
           ) : (
             <MusicNoteIcon className="w-6 h-6 opacity-50" />
           )}
-        </div>
+        </button>
         <div className="min-w-0 flex-1">
           <button
             onClick={() => {
@@ -98,25 +99,18 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
         {activeTrack ? (
           <>
             <button
-              onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
-              title={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs (favorites)'}
-              className={`flex-shrink-0 p-1 transition-colors cursor-pointer ${isLiked ? 'text-[#1DB954] hover:scale-105' : 'text-[#b3b3b3] hover:text-white'}`}
-            >
-              {isLiked ? <CheckCircleIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
-            </button>
-            <button
               onClick={() => stopPlayback()}
-              title="Close / Stop playback"
-              className="w-6 h-6 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#232323] transition-colors cursor-pointer"
+              title="Close"
+              className="w-6 h-6 flex items-center justify-center rounded-full text-[#6a6a6a] hover:text-white hover:bg-[#232323] transition-colors cursor-pointer"
             >
-              <span className="text-sm leading-none">×</span>
+              <span className="text-[14px] leading-none">×</span>
             </button>
             <button
               onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
-              title={isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs'}
-              className={`w-6 h-6 flex items-center justify-center rounded-full transition-colors cursor-pointer ${isLiked ? 'bg-[#1DB954] text-black hover:bg-[#1ed760]' : 'bg-[#2a2a2a] text-[#b3b3b3] hover:text-white hover:bg-[#3e3e3e]'}`}
+              title={isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs (+)'}
+              className={`w-6 h-6 flex items-center justify-center rounded-full border transition-colors cursor-pointer ${isLiked ? 'bg-white text-black border-white hover:bg-[#f0f0f0]' : 'bg-transparent text-[#b3b3b3] border-[#6a6a6a] hover:text-white hover:border-white'}`}
             >
-              <span className="text-sm leading-none font-bold">{isLiked ? '✓' : '+'}</span>
+              <span className="text-[14px] leading-none font-bold">{isLiked ? '✓' : '+'}</span>
             </button>
           </>
         ) : (
@@ -124,8 +118,8 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
         )}
       </div>
 
-      {/* Center core: 32px white play circle, 16px gaps, 4px timeline + handle */}
-      <div className="flex flex-col items-center gap-2 w-[40%] max-w-[722px]">
+      {/* Center core: stays visually centered */}
+      <div className="flex flex-col items-center gap-2 absolute left-1/2 -translate-x-1/2 w-[420px] max-w-[36vw]">
         <div className="flex items-center">
           <button
             onClick={toggleShuffle}
@@ -176,51 +170,44 @@ export default function PlayerBar({ nowPlayingOpen, onToggleNowPlaying, onFullsc
         </div>
       </div>
 
-      {/* Right (Utility Icons): 16px vectors, 16px gaps, volume 120px, properly spaced from center */}
-      <div className="flex items-center gap-4 w-[36%] justify-end min-w-[220px] h-full pr-1">
-        <button
-          onClick={onToggleNowPlaying}
-          title="Now playing view"
-          className={`relative w-7 h-7 flex items-center justify-center rounded-full transition-colors ${nowPlayingOpen || activePane === 'nowPlaying' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a]'}`}
-        >
-          <NowPlayingIcon className="w-3.5 h-3.5" />
-          {(nowPlayingOpen || activePane === 'nowPlaying') && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />}
-        </button>
-        <button onClick={onToggleLyrics} title="Lyrics" className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${activePane === 'lyrics' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a]'}`}>
-          <MicIcon className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={onToggleQueue} title="Queue" className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${activePane === 'queue' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a]'}`}>
-          <QueueIcon className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={onToggleDevice} title="Connect to a device" className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${activePane === 'device' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a]'}`}>
-          <DeviceIcon className="w-3.5 h-3.5" />
-        </button>
-        <div className="flex items-center gap-2 ml-1">
-          <button onClick={() => setMuted(!muted)} title="Mute" className="w-7 h-7 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a] transition-colors">
-            {muted || state.volume === 0 ? <VolumeMuteIcon className="w-3.5 h-3.5" /> : <VolumeIcon className="w-3.5 h-3.5" />}
+{/* Right: flush to far end - <0.7cm gap, almost touching */}
+        <div className="flex items-center justify-end gap-3 flex-1 min-w-0">
+          <button onClick={onToggleLyrics} title="Lyrics" className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${activePane === 'lyrics' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#6a6a6a] hover:text-white hover:bg-[#1a1a1a]'}`}>
+            <MicIcon className="w-3.5 h-3.5" />
           </button>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={volumeShown}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              setVolume(v);
-              setMuted(v === 0);
-            }}
-            className="spotify-range w-[110px]"
-            style={{ background: `linear-gradient(to right, #fff ${pct(volumeShown * 100)}, #4d4d4d ${pct(volumeShown * 100)})` }}
-          />
+          <button onClick={onToggleQueue} title="Queue" className={`relative w-7 h-7 flex items-center justify-center rounded-full transition-colors ${activePane === 'queue' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#1DB954] hover:text-white hover:bg-[#1a1a1a]'}`}>
+            <QueueIcon className="w-3.5 h-3.5" />
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1DB954]" />
+          </button>
+          <button onClick={onToggleDevice} title="Connect to a device" className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${activePane === 'device' ? 'text-[#1DB954] bg-[#232323]' : 'text-[#6a6a6a] hover:text-white hover:bg-[#1a1a1a]'}`}>
+            <DeviceIcon className="w-3.5 h-3.5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setMuted(!muted)} title="Mute" className="w-7 h-7 flex items-center justify-center rounded-full text-[#6a6a6a] hover:text-white hover:bg-[#1a1a1a] transition-colors">
+              {muted || state.volume === 0 ? <VolumeMuteIcon className="w-3.5 h-3.5" /> : <VolumeIcon className="w-3.5 h-3.5" />}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volumeShown}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setVolume(v);
+                setMuted(v === 0);
+              }}
+              className="spotify-range w-[120px]"
+              style={{ background: `linear-gradient(to right, #fff ${pct(volumeShown * 100)}, #535353 ${pct(volumeShown * 100)})` }}
+            />
+          </div>
+          <button onClick={onToggleMini} title={isMiniActive ? 'Exit mini player' : 'Mini player'} className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isMiniActive ? 'text-[#1DB954] bg-[#232323]' : 'text-[#6a6a6a] hover:text-white hover:bg-[#1a1a1a]'}`}>
+            <MiniPlayerIcon className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={onFullscreen} title={isFullscreenActive ? 'Exit full screen' : 'Full screen'} className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isFullscreenActive ? 'text-[#1DB954] bg-[#232323]' : 'text-[#6a6a6a] hover:text-white hover:bg-[#1a1a1a]'}`}>
+            <FullscreenIcon className="w-3.5 h-3.5" />
+          </button>
         </div>
-        <button onClick={onToggleMini} title="Mini player (Picture-in-Picture)" className="w-7 h-7 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a] transition-colors">
-          <MiniPlayerIcon className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={onFullscreen} title="Full screen" className="w-7 h-7 flex items-center justify-center rounded-full text-[#b3b3b3] hover:text-white hover:bg-[#1a1a1a] transition-colors">
-          <FullscreenIcon className="w-3.5 h-3.5" />
-        </button>
-      </div>
     </div>
   );
 }

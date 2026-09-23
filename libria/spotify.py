@@ -8,9 +8,10 @@ row to a local path, which the UI reflects as a cloud→downloaded icon swap.
 
 URL forms accepted:
   https://open.spotify.com/track/<ID>[?si=...]      -> one track
-  https://open.spotify.com/album/<ID>              -> one track, album-cst
-  https://open.spotify.com/playlist/<ID>           -> one collection row
-  spotify:track:<ID> / spotify:album:<ID> / spotify:playlist:<ID>
+  https://open.spotify.com/album/<ID>              -> album + collection
+  https://open.spotify.com/playlist/<ID>           -> playlist + collection
+  https://open.spotify.com/show/<ID>               -> podcast + collection
+  spotify:track:<ID> / spotify:album:<ID> / spotify:playlist:<ID> / spotify:show:<ID>
 
 Metadata fetching (oEmbed) is opportunistic: when unreachable the row is
 still created so the queue can proceed, and the tagging step fills the
@@ -26,7 +27,7 @@ import urllib.request
 from .db import normalize_track_id
 
 SPOTIFY_HOST_RE = re.compile(r"^open\.spotify\.com$")
-VALID_TYPES = {"track", "album", "playlist"}
+VALID_TYPES = {"track", "album", "playlist", "show", "podcast"}
 
 
 def parse_spotify_ref(url: str) -> dict:
@@ -79,8 +80,9 @@ def track_payload(reference: dict, metadata: dict | None = None) -> dict:
             "spotify_url": canonical_url,
             "artwork_url": meta.get("artwork_url"),
         }
-    # albums/playlists import as a placeholder track row plus a collection
+    # albums/playlists/shows import as a placeholder track row plus a collection
     display = meta.get("title") or f"Spotify {kind} {sid[:8]}"
+    ctype = "album" if kind == "album" else "playlist"
     return {
         "track_id": normalize_track_id(f"{kind}:{sid}"),
         "title": display,

@@ -96,3 +96,5 @@ body {
   background: #1db954;
   animation: libria-eq 1s ease-in-out infinite;
 }
+
+/* nav arrows use Tailwind sizing; no extra global needed */

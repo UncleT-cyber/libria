@@ -13,6 +13,7 @@ browser. Endpoints mirror the invoke argument layout exactly:
 """
 from __future__ import annotations
 
+import logging
 import json
 import mimetypes
 import urllib.parse
@@ -22,6 +23,9 @@ from typing import Optional
 
 from .db import Database
 from .sync import library_stats
+
+logger = logging.getLogger(__name__)
+
 try:
     from .supabase_client import get_db as get_supabase_db, is_supabase_configured
 except ImportError:
@@ -35,7 +39,7 @@ CORS_HEADERS = [
 ]
 
 GET_ROUTES = {"get_library", "get_library_stats", "get_settings", "get_downloads", "get_favorites"}
-POST_ROUTES = {"scan_folder", "import_files", "import_spotify", "set_setting", "toggle_favorite", "play_track"}
+POST_ROUTES = {"scan_folder", "import_files", "import_spotify", "create_playlist", "add_to_playlist", "set_setting", "toggle_favorite", "play_track", "fetch_lyrics"}
 
 
 class ApiHandler(BaseHTTPRequestHandler):
@@ -192,6 +196,12 @@ class ApiHandler(BaseHTTPRequestHandler):
                 self._send_json({"added": added, "filePaths": paths})
             elif command == "import_spotify":
                 self._handle_import_spotify(body)
+            elif command == "create_playlist":
+                self._handle_create_playlist(body)
+            elif command == "add_to_playlist":
+                self._handle_add_to_playlist(body)
+            elif command == "fetch_lyrics":
+                self._handle_fetch_lyrics(body)
             elif command == "set_setting":
                 self._db().set_setting(body["key"], str(body["value"]))
                 self._send_json({"key": body["key"], "value": str(body["value"])})
@@ -241,26 +251,155 @@ class ApiHandler(BaseHTTPRequestHandler):
 
     def _handle_import_spotify(self, body: dict) -> None:
         from . import spotify
+        from .lyrics import fetch_lyrics
 
         reference = spotify.parse_spotify_ref(body["url"])
         metadata = spotify.fetch_oembed(reference["url"])
         payload = spotify.track_payload(reference, metadata)
         track_id = self._db().upsert_track(payload)
-        if reference["kind"] != "track":
-            self._db().create_collection(payload["title"], "album" if reference["kind"] == "album" else "playlist")
         manager = getattr(self.server, "download_manager", None)
         enqueued = False
-        if manager is not None and reference["kind"] == "track":
-            manager.request_track(self._db().get_track(track_id) or payload, play_now=False)
-            enqueued = True
+        collection_id = None
+
+        if reference["kind"] == "album":
+            collection_id = self._db().create_collection(payload["title"], "album")
+            album_name = payload["title"]
+            album_track = dict(payload)
+            album_track["album"] = album_name
+            self._db().upsert_track(album_track)
+            if manager is not None:
+                manager.request_track(album_track, play_now=False)
+                enqueued = True
+            try:
+                track_list = self._fetch_spotify_album_tracks(reference["id"])
+                if track_list:
+                    for t in track_list:
+                        artist_name = t["artists"][0]["name"] if t.get("artists") else "Unknown"
+                        t_payload = {
+                            "track_id": spotify.normalize_track_id(t["id"]),
+                            "title": t["name"],
+                            "artist": artist_name,
+                            "album": album_name,
+                            "spotify_url": f"https://open.spotify.com/track/{t['id']}",
+                            "artwork_url": metadata.get("artwork_url"),
+                        }
+                        t_id = self._db().upsert_track(t_payload)
+                        self._db().add_to_collection(collection_id, t_id)
+                        if manager is not None:
+                            manager.request_track(self._db().get_track(t_id) or t_payload, play_now=False)
+                            enqueued = True
+                    status = "album_queued" if enqueued else "album_created"
+                else:
+                    status = "album_queued" if enqueued else "album_created"
+            except Exception as exc:
+                logger.warning("Failed to fetch album tracks: %s", exc)
+                status = "album_queued" if enqueued else "album_created"
+        elif reference["kind"] == "playlist":
+            collection_id = self._db().create_collection(payload["title"], "playlist")
+            try:
+                track_list = self._fetch_spotify_playlist_tracks(reference["id"])
+                if track_list:
+                    for t in track_list:
+                        artist_name = t["track"]["artists"][0]["name"] if t.get("track", {}).get("artists") else "Unknown"
+                        t_payload = {
+                            "track_id": spotify.normalize_track_id(t["track"]["id"]),
+                            "title": t["track"]["name"],
+                            "artist": artist_name,
+                            "album": None,
+                            "spotify_url": f"https://open.spotify.com/track/{t['track']['id']}",
+                            "artwork_url": metadata.get("artwork_url"),
+                        }
+                        t_id = self._db().upsert_track(t_payload)
+                        self._db().add_to_collection(collection_id, t_id)
+                        if manager is not None:
+                            manager.request_track(self._db().get_track(t_id) or t_payload, play_now=False)
+                            enqueued = True
+                    status = "playlist_queued" if enqueued else "playlist_created"
+                else:
+                    status = "playlist_created"
+            except Exception as exc:
+                logger.warning("Failed to fetch playlist tracks: %s", exc)
+                status = "playlist_created"
+        elif reference["kind"] in ("show", "podcast"):
+            collection_id = self._db().create_collection(payload["title"], "playlist")
+            status = "podcast_created"
+        else:
+            if manager is not None:
+                manager.request_track(self._db().get_track(track_id) or payload, play_now=False)
+                enqueued = True
+            status = "queued" if enqueued else "stream-only"
+
+        if metadata.get("title") and metadata.get("artist"):
+            lyrics = fetch_lyrics(metadata["title"], metadata["artist"])
+            if lyrics:
+                updated = self._db().get_track(track_id) or payload
+                updated["lyrics"] = lyrics
+                self._db().upsert_track(updated)
+
         status_map = getattr(self.server, "download_status", None)
         if status_map is not None:
-            status_map[track_id] = "queued" if enqueued else "stream-only"
+            status_map[track_id] = status
         self._send_json({
             "track": self._db().get_track(track_id),
+            "collection_id": collection_id,
             "enqueued": enqueued,
             "metadata_resolved": bool(metadata),
+            "status": status,
         })
+
+    def _handle_create_playlist(self, body: dict) -> None:
+        name = body.get("name") or body.get("playlist_name")
+        if not name:
+            self._send_json({"error": "missing name"}, status=400)
+            return
+        collection_id = self._db().create_collection(name, "playlist")
+        self._send_json({"collection_id": collection_id, "name": name})
+
+    def _handle_add_to_playlist(self, body: dict) -> None:
+        collection_id = body.get("collection_id")
+        track_id = body.get("track_id") or body.get("trackId")
+        if not collection_id or not track_id:
+            self._send_json({"error": "missing collection_id or track_id"}, status=400)
+            return
+        self._db().add_to_collection(collection_id, track_id)
+        self._send_json({"success": True})
+
+    def _handle_fetch_lyrics(self, body: dict) -> None:
+        from .lyrics import fetch_lyrics
+        title = body.get("title")
+        artist = body.get("artist")
+        if not title or not artist:
+            self._send_json({"error": "missing title or artist"}, status=400)
+            return
+        lyrics = fetch_lyrics(title, artist)
+        self._send_json({"lyrics": lyrics})
+
+    def _fetch_spotify_album_tracks(self, album_id: str) -> list:
+        """Fetch album tracks via the Spotify oEmbed/OpenGraph API."""
+        import json
+        import urllib.request
+        url = f"https://api.spotify.com/v1/albums/{album_id}/tracks"
+        try:
+            req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.load(resp)
+            return data.get("items", [])
+        except Exception:
+            # Fallback: return empty list, will use oEmbed metadata
+            return []
+
+    def _fetch_spotify_playlist_tracks(self, playlist_id: str) -> list:
+        """Fetch playlist tracks via the Spotify API."""
+        import json
+        import urllib.request
+        url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+        try:
+            req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.load(resp)
+            return data.get("items", [])
+        except Exception:
+            return []
 
     def log_message(self, format, *args):  # keep server logs opt-in
         if getattr(self.server, "verbose", False):  # type: ignore[attr-defined]
@@ -309,8 +448,14 @@ def main() -> None:
     import sys
 
     # Render injects PORT=10000; local dev uses 12001 or argv[1]
-    port = int(os.getenv("PORT") or (sys.argv[1] if len(sys.argv) > 1 else 12001))
-    db_path = sys.argv[2] if len(sys.argv) > 2 else None
+    port_arg = None
+    for arg in sys.argv[1:]:
+        if arg.startswith("--port="):
+            port_arg = arg.split("=")[1]
+        elif not arg.startswith("--") and port_arg is None:
+            port_arg = arg
+    port = int(os.getenv("PORT") or port_arg or 12001)
+    db_path = sys.argv[-1] if len(sys.argv) > 1 and not sys.argv[-1].startswith("--") else None
     # Prefer Supabase on Render/Vercel when env is set
     if get_supabase_db is not None and is_supabase_configured():
         db = get_supabase_db()  # type: ignore
