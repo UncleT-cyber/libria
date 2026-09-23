@@ -4,8 +4,8 @@ import { useState } from 'react';
 import {
   PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
   MusicNoteIcon, PlayerPencilIcon, PlayerQueueIcon,
-  VolumeIcon, VolumeMuteIcon, PlayerFullscreenIcon,
-  PlayerMiniIcon, PlayerDeviceIcon,
+  PlayerVolumeIcon, PlayerVolumeMuteIcon, PlayerFullscreenIcon,
+  PlayerMiniIcon, PlayerDeviceIcon, PlayerCloseIcon, PlayerAddIcon, PlayerAddedIcon,
 } from './icons';
 
 const fmt = (seconds: number) => {
@@ -105,52 +105,52 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
             <button
               onClick={() => stopPlayback()}
               title="Close"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b3b3b3] hover:text-white"
+              className="flex h-8 w-8 shrink-0 items-center justify-center text-[#b3b3b3] hover:text-white"
             >
-              <span className="text-lg leading-none">×</span>
+              <PlayerCloseIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => state.currentTrack && toggleFavorite(state.currentTrack)}
               title={isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs'}
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm ${isLiked ? 'border-white bg-white text-black' : 'border-[#6a6a6a] text-[#b3b3b3] hover:border-white hover:text-white'}`}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center ${isLiked ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
             >
-              {isLiked ? '✓' : '+'}
+              {isLiked ? <PlayerAddedIcon className="h-4 w-4" /> : <PlayerAddIcon className="h-4 w-4" />}
             </button>
           </>
         )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifySelf: 'center', width: '100%', maxWidth: 540 }}>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={toggleShuffle}
             title="Enable shuffle"
-            className={`relative flex h-8 w-8 items-center justify-center ${shuffle ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+            className={`relative flex h-8 w-8 items-center justify-center ${shuffle ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}
           >
             <ShuffleIcon className="h-4 w-4" />
-            {shuffle && <span className="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#1DB954]" />}
+            {shuffle && <span className="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#1ED760]" />}
           </button>
-          <button onClick={() => playNeighbor(-1)} title="Previous" className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] hover:text-white">
-            <PrevIcon className="h-4 w-4" />
+          <button onClick={() => playNeighbor(-1)} title="Previous" className="flex h-8 w-8 items-center justify-center text-white hover:scale-105">
+            <PrevIcon className="h-[18px] w-[18px]" />
           </button>
           <button
             onClick={togglePlay}
             title={state.isPlaying ? 'Pause' : 'Play'}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black hover:scale-105"
+            className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-white text-black hover:scale-105"
           >
-            {state.isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="ml-0.5 h-4 w-4" />}
+            {state.isPlaying ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="ml-0.5 h-3.5 w-3.5" />}
           </button>
-          <button onClick={() => playNeighbor(1)} title="Next" className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] hover:text-white">
-            <NextIcon className="h-4 w-4" />
+          <button onClick={() => playNeighbor(1)} title="Next" className="flex h-8 w-8 items-center justify-center text-white hover:scale-105">
+            <NextIcon className="h-[18px] w-[18px]" />
           </button>
           <button
             onClick={cycleRepeat}
             title={repeatMode === 'one' ? 'Repeat one' : repeatMode === 'all' ? 'Enable repeat' : 'Enable repeat one'}
-            className={`relative flex h-8 w-8 items-center justify-center ${repeatMode !== 'off' ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+            className={`relative flex h-8 w-8 items-center justify-center ${repeatMode !== 'off' ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}
           >
             <RepeatIcon className="h-4 w-4" />
             {repeatMode !== 'off' && (
-              <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 ${repeatMode === 'one' ? 'text-[8px] font-bold leading-none' : 'h-1 w-1 rounded-full bg-[#1DB954]'}`}>
+              <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 ${repeatMode === 'one' ? 'text-[8px] font-bold leading-none text-[#1ED760]' : 'h-1 w-1 rounded-full bg-[#1ED760]'}`}>
                 {repeatMode === 'one' ? '1' : ''}
               </span>
             )}
@@ -175,11 +175,11 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
         <button onClick={onToggleNowPlaying} title="Now playing" className="flex h-8 w-8 items-center justify-center text-[#b3b3b3] hover:text-white">
           <PlayerPencilIcon className="h-4 w-4" />
         </button>
-        <button onClick={onToggleQueue} title="Queue" className={`relative flex h-8 w-8 items-center justify-center ${activePane === 'queue' ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}>
+        <button onClick={onToggleQueue} title="Queue" className={`relative flex h-8 w-8 items-center justify-center ${activePane === 'queue' ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}>
           <PlayerQueueIcon className="h-4 w-4" />
-          {activePane === 'queue' && <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#1DB954]" />}
+          {activePane === 'queue' && <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#1ED760]" />}
         </button>
-        <button onClick={onToggleDevice} title="Connect to a device" className={`flex h-8 w-8 items-center justify-center ${activePane === 'device' ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}>
+        <button onClick={onToggleDevice} title="Connect to a device" className={`flex h-8 w-8 items-center justify-center ${activePane === 'device' ? 'text-[#1ED760]' : 'text-[#b3b3b3] hover:text-white'}`}>
           <PlayerDeviceIcon className="h-4 w-4" />
         </button>
         <button
@@ -187,7 +187,7 @@ export default function PlayerBar({ onFullscreen, activePane, isMiniActive, isFu
           title="Mute"
           className="ml-1 flex h-8 w-8 items-center justify-center text-[#b3b3b3] hover:text-white"
         >
-          {muted || state.volume === 0 ? <VolumeMuteIcon className="h-4 w-4" /> : <VolumeIcon className="h-4 w-4" />}
+          {muted || state.volume === 0 ? <PlayerVolumeMuteIcon className="h-4 w-4" /> : <PlayerVolumeIcon className="h-4 w-4" />}
         </button>
         <input
           type="range"

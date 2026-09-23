@@ -2,8 +2,6 @@ import type { SVGProps } from 'react';
 import {
   Bell as LucideBell,
   Users as LucideUsers,
-  Shuffle as LucideShuffle,
-  Repeat as LucideRepeat,
   Heart as LucideHeart,
   Volume2 as LucideVolume,
   VolumeX as LucideVolumeMute,
@@ -51,19 +49,34 @@ export const PlusIcon = (p: P) => (
 );
 
 export const PlayIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M4.8 2.6v10.8L13.4 8 4.8 2.6z" /></svg>
 );
 export const PauseIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M3.2 2.4h3.1v11.2H3.2zM9.7 2.4h3.1v11.2H9.7z" /></svg>
 );
 export const NextIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 24 24" fill="currentColor"><path d="M5 4h2v16H5zM8 5.5v13l11-6.5z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M12.6 2.2h1.5v11.6h-1.5zM2.2 2.6l8.6 5.4-8.6 5.4V2.6z" /></svg>
 );
 export const PrevIcon = (p: P) => (
-  <svg {...base(p)} viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h2v16h-2zM16 5.5v13l-11-6.5z" /></svg>
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor"><path d="M1.9 2.2h1.5v11.6H1.9zM13.8 2.6 5.2 8l8.6 5.4V2.6z" /></svg>
 );
-export const ShuffleIcon = (p: P) => lucideWrap(LucideShuffle, p);
-export const RepeatIcon = (p: P) => lucideWrap(LucideRepeat, p);
+export const ShuffleIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 4.5h2.4c.8 0 1.5.4 1.9 1.1L9.2 10c.4.6 1 .9 1.7.9H14" />
+    <path d="M12.1 9.2 14 10.9l-1.9 1.7" />
+    <path d="M2 11.5h2.4c.7 0 1.3-.3 1.7-.9" />
+    <path d="M8.4 5.6c.4-.6 1-.9 1.7-.9H14" />
+    <path d="M12.1 6.8 14 5.1 12.1 3.4" />
+  </svg>
+);
+export const RepeatIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3.2 5.2h7.2a2 2 0 0 1 2 2v1.2" />
+    <path d="M10.6 3.4 12.4 5.2 10.6 7" />
+    <path d="M12.8 10.8H5.6a2 2 0 0 1-2-2V7.6" />
+    <path d="M5.4 12.6 3.6 10.8l1.8-1.8" />
+  </svg>
+);
 
 export const HeartIcon = (p: P) => lucideWrap(LucideHeart, p);
 
@@ -168,34 +181,69 @@ export const ExpandArrowIcon = (p: P) => (
 );
 
 export const PlayerPencilIcon = (p: P) => (
-  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-    <path d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-3-3L5 17v3z" />
-    <path d="M13.5 6.5l3 3" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2.4 13.6h2.2L12.2 6.1a1.5 1.5 0 0 0-2.1-2.1L2.5 11.5v2.1z" />
+    <path d="M9.2 4.8l2 2" />
   </svg>
 );
 
 export const PlayerQueueIcon = (p: P) => (
-  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" viewBox="0 0 24 24">
-    <path d="M4 7h16M4 12h10M4 17h16" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round">
+    <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
   </svg>
 );
 
 export const PlayerDeviceIcon = (p: P) => (
-  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-    <rect x="3" y="4" width="18" height="12" rx="2" />
-    <path d="M8 20h8M12 16v4" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="1.8" y="2.4" width="12.4" height="8.2" rx="1.2" />
+    <path d="M5.2 13.6h5.6M8 10.6v3" />
+  </svg>
+);
+
+export const PlayerVolumeIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M1.6 6.1h2.3L7.2 3.2v9.6L3.9 9.9H1.6V6.1z" />
+    <path d="M9.2 5.7a2.7 2.7 0 0 1 0 4.6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    <path d="M10.8 4.2a4.6 4.6 0 0 1 0 7.6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+  </svg>
+);
+
+export const PlayerVolumeMuteIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M1.6 6.1h2.3L7.2 3.2v9.6L3.9 9.9H1.6V6.1z" />
+    <path d="M10 6.2 13.4 9.6M13.4 6.2 10 9.6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
   </svg>
 );
 
 export const PlayerFullscreenIcon = (p: P) => (
-  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2.4 6.2V2.8h3.4M13.6 6.2V2.8h-3.4M2.4 9.8v3.4h3.4M13.6 9.8v3.4h-3.4" />
   </svg>
 );
 
 export const PlayerMiniIcon = (p: P) => (
-  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-    <rect x="3" y="4" width="18" height="14" rx="2" />
-    <rect x="12" y="12" width="7" height="4" rx="0.5" fill="currentColor" stroke="none" />
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round">
+    <rect x="1.8" y="2.6" width="12.4" height="9.2" rx="1.2" />
+    <rect x="8.2" y="7.4" width="4.6" height="3.2" rx="0.4" />
+  </svg>
+);
+
+export const PlayerCloseIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round">
+    <path d="M4 4l8 8M12 4 4 12" />
+  </svg>
+);
+
+export const PlayerAddIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round">
+    <circle cx="8" cy="8" r="5.6" />
+    <path d="M8 5.2v5.6M5.2 8h5.6" />
+  </svg>
+);
+
+export const PlayerAddedIcon = (p: P) => (
+  <svg {...base(p)} viewBox="0 0 16 16" fill="currentColor">
+    <circle cx="8" cy="8" r="6.2" />
+    <path d="M4.8 8.2 7 10.3l4.3-4.6" fill="none" stroke="#000" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
